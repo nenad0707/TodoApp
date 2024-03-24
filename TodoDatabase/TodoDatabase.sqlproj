@@ -68,6 +68,9 @@
   <ItemGroup>
     <Build Include="dbo\Tables\Todo.sql" />
   </ItemGroup>
+  <ItemGroup>
+    <None Include="TodoDatabase.publish.xml" />
+  </ItemGroup>
   <Import Project="$(NETCoreTargetsPath)\Microsoft.Data.Tools.Schema.SqlTasks.targets" Condition="'$(NetCoreBuild)' == 'true'" />
   <Target Name="BeforeBuild">
     <Delete Files="$(BaseIntermediateOutputPath)\project.assets.json" />
