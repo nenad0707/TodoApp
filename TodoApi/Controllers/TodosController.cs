@@ -33,6 +33,12 @@ public class TodosController : ControllerBase
     {
     }
 
+    // PUT api/Todos/5/Complete
+    [HttpPut("{id}/complete")]
+    public void Complete(int id)
+    {
+    }
+
     // DELETE api/Todos/5
     [HttpDelete("{id}")]
     public void Delete(int id)
