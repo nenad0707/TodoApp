@@ -30,21 +30,21 @@ public class TodosController : ControllerBase
 
     // PUT api/Todos/5
     [HttpPut("{id}")]
-    public void Put(int id, [FromBody] string value)
+    public IActionResult Put(int id, [FromBody] string value)
     {
         throw new NotImplementedException();
     }
 
     // PUT api/Todos/5/Complete
     [HttpPut("{id}/complete")]
-    public void Complete(int id)
+    public IActionResult Complete(int id)
     {
         throw new NotImplementedException();
     }
 
     // DELETE api/Todos/5
     [HttpDelete("{id}")]
-    public void Delete(int id)
+    public IActionResult Delete(int id)
     {
         throw new NotImplementedException();
     }
