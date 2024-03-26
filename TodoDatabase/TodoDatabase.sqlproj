@@ -66,6 +66,7 @@
     <Build Include="dbo\Stored Procedures\spTodos_GetOneAssigned.sql" />
     <Build Include="dbo\Stored Procedures\spTodos_Create.sql" />
     <Build Include="dbo\Stored Procedures\spTodos_UpdateTask.sql" />
+    <Build Include="dbo\Stored Procedures\spTodos_CompleteTodo.sql" />
   </ItemGroup>
   <ItemGroup>
     <None Include="TodoDatabase.publish.xml" />
