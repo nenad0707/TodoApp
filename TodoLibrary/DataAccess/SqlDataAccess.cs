@@ -38,5 +38,14 @@ public class SqlDataAccess
 
     return rows.ToList();
   }
+
+  public Task SaveData<T>(string storedProcedure, T parameters, string connectionStringName)
+  {
+    string connectionString = _config.GetConnectionString(connectionStringName)!;
+
+    using IDbConnection connection = new SqlConnection(connectionString);
+
+    return connection.ExecuteAsync(storedProcedure, parameters, commandType: CommandType.StoredProcedure);
+  }
 }
 
