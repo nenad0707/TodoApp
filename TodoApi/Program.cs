@@ -1,18 +1,12 @@
-using TodoLibrary;
-using TodoLibrary.DataAccess;
+using TodoApi.StartupConfig;
 
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
 
-builder.Services.AddControllers();
-builder.Services.AddEndpointsApiExplorer();
-builder.Services.AddSwaggerGen();
-builder.Services.AddSingleton<ISqlDataAccess, SqlDataAccess>();
-builder.Services.AddSingleton<ITodoData, TodoData>();
-
-builder.Services.AddHealthChecks()
-    .AddSqlServer(builder.Configuration.GetConnectionString("Default")!);
+builder.AddStandardServices();
+builder.AddHealthChecks();
+builder.AddCustomServices();
 
 var app = builder.Build();
 
