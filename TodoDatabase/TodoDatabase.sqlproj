@@ -58,9 +58,11 @@
     <Folder Include="Properties" />
     <Folder Include="dbo" />
     <Folder Include="dbo\Tables" />
+    <Folder Include="dbo\Stored Procedures" />
   </ItemGroup>
   <ItemGroup>
     <Build Include="dbo\Tables\Todos.sql" />
+    <Build Include="dbo\Stored Procedures\spTodos_GetAllAssigned.sql" />
   </ItemGroup>
   <ItemGroup>
     <None Include="TodoDatabase.publish.xml" />
