@@ -41,4 +41,9 @@ public class TodoData
   {
     return _sql.SaveData<dynamic>("dbo.spTodos_CompleteTodo", new { AssignedTo = assignedTo, TodoId = todoId }, "Default");
   }
+
+  public Task Delete(int assignedTo, int todoId)
+  {
+    return _sql.SaveData<dynamic>("dbo.spTodos_Delete", new { AssignedTo = assignedTo, TodoId = todoId }, "Default");
+  }
 }
