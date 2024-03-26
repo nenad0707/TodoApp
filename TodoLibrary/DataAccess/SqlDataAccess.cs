@@ -39,6 +39,14 @@ public class SqlDataAccess
     return rows.ToList();
   }
 
+  /// <summary>
+  /// Saves data to the database using a stored procedure.
+  /// </summary>
+  /// <typeparam name="T">The type of parameters for the stored procedure.</typeparam>
+  /// <param name="storedProcedure">The name of the stored procedure.</param>
+  /// <param name="parameters">The parameters for the stored procedure.</param>
+  /// <param name="connectionStringName">The name of the connection string in the configuration.</param>
+  /// <returns>A task representing the asynchronous operation.</returns>
   public Task SaveData<T>(string storedProcedure, T parameters, string connectionStringName)
   {
     string connectionString = _config.GetConnectionString(connectionStringName)!;
