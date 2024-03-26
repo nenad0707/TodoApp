@@ -60,7 +60,7 @@
     <Folder Include="dbo\Tables" />
   </ItemGroup>
   <ItemGroup>
-    <Build Include="dbo\Tables\Todo.sql" />
+    <Build Include="dbo\Tables\Todos.sql" />
   </ItemGroup>
   <ItemGroup>
     <None Include="TodoDatabase.publish.xml" />
