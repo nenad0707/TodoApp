@@ -23,7 +23,7 @@ public class TodosController : ControllerBase
 
     // POST api/Todos
     [HttpPost]
-    public IActionResult Post([FromBody] string value)
+    public IActionResult Post([FromBody] TodoModel value)
     {
         throw new NotImplementedException();
     }
