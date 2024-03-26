@@ -63,6 +63,7 @@
   <ItemGroup>
     <Build Include="dbo\Tables\Todos.sql" />
     <Build Include="dbo\Stored Procedures\spTodos_GetAllAssigned.sql" />
+    <Build Include="dbo\Stored Procedures\spTodos_GetOneAssigned.sql" />
   </ItemGroup>
   <ItemGroup>
     <None Include="TodoDatabase.publish.xml" />
