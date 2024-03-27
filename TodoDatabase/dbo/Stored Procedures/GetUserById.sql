@@ -1,0 +1,6 @@
+﻿CREATE PROCEDURE [dbo].[GetUserById]
+	 @Id INT
+AS
+BEGIN
+    SELECT * FROM Users WHERE Id = @Id
+END
