@@ -1,10 +1,11 @@
 ﻿CREATE PROCEDURE [dbo].[spTodos_Create]
 	@Task NVARCHAR(50),
-	@AssignedTo INT
+	@AssignedTo INT,
+	@IsCompleted BIT
 AS
 BEGIN
-	INSERT INTO dbo.Todos ([Task], [AssignedTo])
-	VALUES (@Task, @AssignedTo);
+	INSERT INTO dbo.Todos ([Task], [AssignedTo],[IsCompleted])
+	VALUES (@Task, @AssignedTo, @IsCompleted);
 
 	SELECT [Id], [Task], [AssignedTo], [IsCompleted] 
 	FROM dbo.Todos

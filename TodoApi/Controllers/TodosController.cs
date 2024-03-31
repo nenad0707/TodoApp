@@ -47,9 +47,9 @@ public class TodosController : ControllerBase
 
     // POST api/Todos
     [HttpPost]
-    public async Task<ActionResult<TodoModel>> Post([FromBody] string task)
+    public async Task<ActionResult<TodoModel>> Post([FromBody] string task, bool isCompleted)
     {
-        var output = await _data.Create(GetUserId(), task);
+        var output = await _data.Create(GetUserId(), task, isCompleted);
 
         return Ok(output);
     }
