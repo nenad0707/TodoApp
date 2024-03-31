@@ -7,6 +7,7 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "TodoLibrary", "TodoLibrary\
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "TodoApi", "TodoApi\TodoApi.csproj", "{8D133941-8D51-4B2C-9CE0-D067B20B2F5A}"
 EndProject
+<<<<<<< HEAD
 Project("{00D1A9C2-B5F0-4AF3-8072-F6C62B433612}") = "TodoDatabase", "TodoDatabase\TodoDatabase.sqlproj", "{1CA7DECD-A9CF-42AC-B8EC-32101863F6C5}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Infrastructure", "Infrastructure", "{42FE8D2C-AF54-4CAA-AFDE-7BA2994E5672}"
@@ -14,6 +15,8 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Infrastructure", "Infrastru
 		main.bicep = main.bicep
 	EndProjectSection
 EndProject
+=======
+>>>>>>> eca585d8a8a7a46411b3ee9c0fa4998456bb5aaa
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -28,12 +31,6 @@ Global
 		{8D133941-8D51-4B2C-9CE0-D067B20B2F5A}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{8D133941-8D51-4B2C-9CE0-D067B20B2F5A}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{8D133941-8D51-4B2C-9CE0-D067B20B2F5A}.Release|Any CPU.Build.0 = Release|Any CPU
-		{1CA7DECD-A9CF-42AC-B8EC-32101863F6C5}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{1CA7DECD-A9CF-42AC-B8EC-32101863F6C5}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{1CA7DECD-A9CF-42AC-B8EC-32101863F6C5}.Debug|Any CPU.Deploy.0 = Debug|Any CPU
-		{1CA7DECD-A9CF-42AC-B8EC-32101863F6C5}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{1CA7DECD-A9CF-42AC-B8EC-32101863F6C5}.Release|Any CPU.Build.0 = Release|Any CPU
-		{1CA7DECD-A9CF-42AC-B8EC-32101863F6C5}.Release|Any CPU.Deploy.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
