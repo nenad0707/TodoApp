@@ -40,7 +40,7 @@ param resourceNameSuffix string = uniqueString(resourceGroup().id)
 
 var sqlDatabaseName = 'TodoDb'
 
-module appServicePlan 'module/appServicePlan.bicep' = {
+module appServicePlan 'infrastructure/module/appServicePlan.bicep' = {
   name: 'appServicePlanModule'
   params: {
     appServicePlanName: appServicePlanName
@@ -51,7 +51,7 @@ module appServicePlan 'module/appServicePlan.bicep' = {
 var appServiceAppName = 'api-website-${resourceNameSuffix}'
 var sqlDatabaseConnectionString = 'Server=tcp:${sqlServer.outputs.fullyQualifiedDomainName},1433;Initial Catalog=${sqlDatabaseName};Persist Security Info=False;User ID=${sqlServerAdministratorLogin};Password=${sqlServerAdministratorLoginPassword};MultipleActiveResultSets=False;Encrypt=True;TrustServerCertificate=False;Connection Timeout=30;'
 
-module appService 'module/appService.bicep' = {
+module appService 'infrastructure/module/appService.bicep' = {
   name: 'appServiceModule'
   params: {
     appServiceName: appServiceAppName
@@ -66,7 +66,7 @@ module appService 'module/appService.bicep' = {
   ]
 }
 
-module sqlServer 'module/sqlServer.bicep' = {
+module sqlServer 'infrastructure/module/sqlServer.bicep' = {
   name: 'sqlServerModule'
   params: {
     location: location
