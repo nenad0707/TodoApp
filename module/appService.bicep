@@ -39,11 +39,15 @@ var requiredSettings = [
   }
 ]
 
+resource appServicePlan 'Microsoft.Web/serverfarms@2021-02-01' existing = {
+  name: appServicePlanName
+}
+
 resource appService 'Microsoft.Web/sites@2021-02-01' = {
   name: appServiceName
   location: location
   properties: {
-    serverFarmId: appServicePlanName
+    serverFarmId: appServicePlan.id
     httpsOnly: true
     siteConfig: {
       linuxFxVersion: 'DOTNETCORE|8.0'

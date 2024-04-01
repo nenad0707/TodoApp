@@ -61,6 +61,9 @@ module appService 'module/appService.bicep' = {
     jwtKey: jwtKey
     sqlDatabaseConnectionString: sqlDatabaseConnectionString
   }
+  dependsOn: [
+    appServicePlan
+  ]
 }
 
 module sqlServer 'module/sqlServer.bicep' = {
