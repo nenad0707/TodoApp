@@ -1,38 +1,3 @@
-// @description('The location of the SQL Server.')
-// param location string
-
-// @description('A unique suffix to add to resource names that need to be globally unique.')
-// @maxLength(13)
-// param resourceNameSuffix string = uniqueString(resourceGroup().id)
-
-// @description('The admin login name of the SQL Server.')
-// param adminLogin string
-
-// @secure()
-// @description('The admin login password of the SQL Server.')
-// param adminPassword string
-
-// var sqlServerName = 'api-website-${resourceNameSuffix}'
-
-// resource sqlServer 'Microsoft.Sql/servers@2021-02-01-preview' = {
-//   name: sqlServerName
-//   location: location
-//   properties: {
-//     administratorLogin: adminLogin
-//     administratorLoginPassword: adminPassword
-//   }
-// }
-
-// resource sqlServerFirewallRule 'Microsoft.Sql/servers/firewallRules@2022-05-01-preview' = {
-//   parent: sqlServer
-//   name: 'AllowAllWindowsAzureIps'
-//   properties: {
-//     endIpAddress: '0.0.0.0'
-//     startIpAddress: '0.0.0.0'
-//   }
-// }
-
-// output fullyQualifiedDomainName string = sqlServer.properties.fullyQualifiedDomainName
 @description('Location for the resources')
 param location string = resourceGroup().location
 
