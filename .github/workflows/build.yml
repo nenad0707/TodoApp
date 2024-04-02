@@ -1,0 +1,49 @@
+name: build-website
+
+on:
+  workflow_dispatch:
+
+jobs:
+  build-application:
+    name: Build Application
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+
+      - name: Install .NET Core SDK
+        uses: actions/setup-dotnet@v3
+        with:
+          dotnet-version: 8.0
+      - name: Build publishable website
+        run: |
+          dotnet publish --configuration Release
+        working-directory: ./TodoApi/TodoApi
+
+      - name: Zip publishable website
+        run: |
+          zip -r publish.zip .
+        working-directory: ./TodoApi/bin/Release/net8.0/publish
+
+      - name: Upload website as workflow artifact
+        uses: actions/upload-artifact@v3
+        with:
+          name: website
+          path: ./TodoApi/bin/Release/net8.0/publish/publish.zip
+  build-database:
+    name: Build database
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v3
+
+      - name: Prepare MSBuild
+        uses: microsoft/setup-msbuild@v1.1
+
+      - name: Build database project
+        working-directory: ./TodoDatabase
+        run: MSBuild.exe TodoDatabase.sqlproj -property:Configuration=Release
+
+      - name: Upload website as workflow artifact
+        uses: actions/upload-artifact@v3
+        with:
+          name: database
+          path: ./TodoDatabase\bin\Release\TodoDatabase.dacpac

@@ -55,3 +55,6 @@ resource appService 'Microsoft.Web/sites@2021-02-01' = {
     }
   }
 }
+
+output appServiceAppHostName string = appService.properties.defaultHostName
+output appServiceAppName string = appService.name

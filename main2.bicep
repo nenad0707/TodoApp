@@ -49,7 +49,7 @@ module appServicePlan 'infrastructure/module/appServicePlan.bicep' = {
   }
 }
 var appServiceAppName = 'api-website-${resourceNameSuffix}'
-var sqlDatabaseConnectionString = 'Server=tcp:${sqlServer.outputs.fullyQualifiedDomainName},1433;Initial Catalog=${sqlDatabaseName};Persist Security Info=False;User ID=${sqlServerAdministratorLogin};Password=${sqlServerAdministratorLoginPassword};MultipleActiveResultSets=False;Encrypt=True;TrustServerCertificate=False;Connection Timeout=30;'
+var sqlDatabaseConnectionString = 'Server=tcp:${sqlServer.outputs.sqlServerFullyQualifiedDomainName},1433;Initial Catalog=${sqlDatabaseName};Persist Security Info=False;User ID=${sqlServerAdministratorLogin};Password=${sqlServerAdministratorLoginPassword};MultipleActiveResultSets=False;Encrypt=True;TrustServerCertificate=False;Connection Timeout=30;'
 
 module appService 'infrastructure/module/appService.bicep' = {
   name: 'appServiceModule'
@@ -74,3 +74,8 @@ module sqlServer 'infrastructure/module/sqlServer.bicep' = {
     sqlServerAdministratorLoginPassword: sqlServerAdministratorLoginPassword
   }
 }
+
+output appServiceAppName string = appService.outputs.appServiceAppName
+output appServiceAppHostName string = appService.outputs.appServiceAppHostName
+output sqlServerFullyQualifiedDomainName string = sqlServer.outputs.sqlServerFullyQualifiedDomainName
+output sqlDatabaseName string = sqlServer.outputs.sqlDatabaseName

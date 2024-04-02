@@ -43,4 +43,5 @@ resource sqlDatabase 'Microsoft.Sql/servers/databases@2022-05-01-preview' = {
   }
 }
 
-output fullyQualifiedDomainName string = sqlServer.properties.fullyQualifiedDomainName
+output sqlServerFullyQualifiedDomainName string = sqlServer.properties.fullyQualifiedDomainName
+output sqlDatabaseName string = sqlDatabase.name
