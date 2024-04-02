@@ -22,7 +22,7 @@ jobs:
       - lint
       - build
     with:
-      resourceGroupName: rg_sb_eastus_89803_1_171208637558
+      resourceGroupName: rg_sb_eastus_89803_1_171209429047
       sqlServerAdministratorLogin: nenad
     secrets:
       AZURE_CLIENT_ID: ${{ secrets.AZURE_CLIENT_ID }}
