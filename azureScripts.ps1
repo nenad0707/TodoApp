@@ -15,22 +15,14 @@ Set-AzDefault -ResourceGroupName rg_sb_eastus_89803_1_171208637558
 
 # Set the GitHub organization and repository names
 $githubOrganizationName = 'nenad0707'
-$githubRepositoryName = 'autobicepsuite'
+$githubRepositoryName = 'TodoApp'
 
 # Create a new Azure AD application
-$applicationRegistration = New-AzADApplication -DisplayName 'autobicepsuite'
-
-# Create a new Azure AD application federated credential
-New-AzADAppFederatedCredential `
-  -Name 'autobicepsuite' `
-  -ApplicationObjectId $applicationRegistration.Id `
-  -Issuer 'https://token.actions.githubusercontent.com' `
-  -Audience 'api://AzureADTokenExchange' `
-  -Subject "repo:$($githubOrganizationName)/$($githubRepositoryName):environment:Azure"
+$applicationRegistration = New-AzADApplication -DisplayName 'TodoApp'
 
 # Create a new Azure AD application federated credential for the autobicepsuite-branch
 New-AzADAppFederatedCredential `
-  -Name 'autobicepsuite-branch' `
+  -Name 'TodoApp-branch' `
   -ApplicationObjectId $applicationRegistration.Id `
   -Issuer 'https://token.actions.githubusercontent.com' `
   -Audience 'api://AzureADTokenExchange' `
