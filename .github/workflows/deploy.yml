@@ -40,7 +40,6 @@ jobs:
         id: deploy
         name: Deploy Bicep file
         with:
-          scope: resourcegroup
           failOnStdErr: false
           deploymentName: ${{ github.run_number }}
           resourceGroupName: ${{ inputs.resourceGroupName }}

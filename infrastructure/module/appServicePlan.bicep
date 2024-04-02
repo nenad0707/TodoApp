@@ -23,7 +23,7 @@ param appServicePlanName string = 'api-website'
 resource appServicePlan 'Microsoft.Web/serverfarms@2021-02-01' = {
   name: appServicePlanName
   location: location
-  kind: 'linux'
+  // kind: 'linux'
   properties: {
     reserved: true
   }
