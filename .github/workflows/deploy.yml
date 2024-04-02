@@ -44,7 +44,7 @@ jobs:
           failOnStdErr: false
           deploymentName: ${{ github.run_number }}
           resourceGroupName: ${{ inputs.resourceGroupName }}
-          template: ./deploy/main.bicep
+          template: main.bicep
           parameters: >
             main.parameters.json
             sqlServerAdministratorLogin=${{ inputs.sqlServerAdministratorLogin }}
