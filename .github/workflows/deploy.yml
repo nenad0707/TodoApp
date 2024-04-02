@@ -40,10 +40,11 @@ jobs:
         id: deploy
         name: Deploy Bicep file
         with:
+          scope: resourcegroup
           failOnStdErr: false
           deploymentName: ${{ github.run_number }}
           resourceGroupName: ${{ inputs.resourceGroupName }}
-          template: main.bicep
+          template: main2.bicep
           parameters: >
             main.parameters.json
             sqlServerAdministratorLogin=${{ inputs.sqlServerAdministratorLogin }}
