@@ -16,6 +16,7 @@ jobs:
   lint:
     uses: ./.github/workflows/lint.yml
 
+  # Deploy the application and database.
   deploy-production:
     uses: ./.github/workflows/deploy.yml
     needs:
