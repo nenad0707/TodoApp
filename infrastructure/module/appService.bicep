@@ -50,8 +50,28 @@ resource appService 'Microsoft.Web/sites@2021-02-01' = {
     serverFarmId: appServicePlan.id
     httpsOnly: true
     siteConfig: {
+      healthCheckPath: '/health'
+      httpLoggingEnabled: true
       linuxFxVersion: 'DOTNETCORE|8.0' //linuxFxVersion
       appSettings: union(appSettings, requiredSettings)
+    }
+  }
+}
+
+resource appServiceLogs 'Microsoft.Web/sites/config@2022-09-01' = {
+  parent: appService
+  name: 'logs'
+  properties: {
+    applicationLogs: {
+      fileSystem: {
+        level: 'Information'
+      }
+    }
+    httpLogs: {
+      fileSystem: {
+        retentionInMb: 35
+        retentionInDays: 7
+      }
     }
   }
 }
