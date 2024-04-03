@@ -63,6 +63,7 @@ module appService 'infrastructure/module/appService.bicep' = {
   }
   dependsOn: [
     appServicePlan
+    sqlServer
   ]
 }
 
