@@ -80,12 +80,6 @@ jobs:
           client-id: ${{ secrets.AZURE_CLIENT_ID }}
           tenant-id: ${{ secrets.AZURE_TENANT_ID }}
           subscription-id: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
-      - name: Check App Service availability
-        run: |
-          while [[ $(az webapp show --name ${{ needs.deploy.outputs.appServiceAppName }} --query provisioningState -o tsv) != "Succeeded" ]]; do
-           echo "Waiting for App Service to be available..."
-           sleep 20
-          done
       - uses: azure/webapps-deploy@v2
         name: Deploy website
         with:
