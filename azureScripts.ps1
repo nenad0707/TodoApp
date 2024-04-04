@@ -10,7 +10,7 @@ $context = Get-AzSubscription -SubscriptionName PAYG-Sandboxes
 Set-AzContext $context
 
 # Set the default resource group
-Set-AzDefault -ResourceGroupName rg_sb_eastus_89803_1_171225897934
+Set-AzDefault -ResourceGroupName rg_sb_eastus_89803_1_171226861234
 ##change resourse group name
 
 # Set the GitHub organization and repository names
@@ -18,42 +18,59 @@ $githubOrganizationName = 'nenad0707'
 $githubRepositoryName = 'TodoApp'
 
 # Create a new Azure AD application
-$applicationRegistration = New-AzADApplication -DisplayName 'TodoApp'
+$testApplicationRegistration = New-AzADApplication -DisplayName 'TodoApp-Test'
 
 # Create a new Azure AD application federated credential
 New-AzADAppFederatedCredential `
-  -Name 'TodoApp' `
+  -Name 'TodoApp-Test' `
   -ApplicationObjectId $applicationRegistration.Id `
   -Issuer 'https://token.actions.githubusercontent.com' `
   -Audience 'api://AzureADTokenExchange' `
-  -Subject "repo:$($githubOrganizationName)/$($githubRepositoryName):environment:Production"
+  -Subject "repo:$($githubOrganizationName)/$($githubRepositoryName):environment:Test"
 
 # Create a new Azure AD application federated credential for the autobicepsuite-branch
 New-AzADAppFederatedCredential `
-  -Name 'TodoApp-branch' `
+  -Name 'TodoApp-test-branch' `
   -ApplicationObjectId $applicationRegistration.Id `
   -Issuer 'https://token.actions.githubusercontent.com' `
   -Audience 'api://AzureADTokenExchange' `
   -Subject "repo:$($githubOrganizationName)/$($githubRepositoryName):ref:refs/heads/main"
 
 # Get the resource group
-$resourceGroup = Get-AzResourceGroup -Name rg_sb_eastus_89803_1_171225897934
+$productionApplicationRegistration = New-AzADApplication -DisplayName 'TodoApp-Production'
 
+New-AzADAppFederatedCredential `
+  -Name 'TodoApp-Production' `
+  -ApplicationObjectId $productionApplicationRegistration.Id `
+  -Issuer 'https://token.actions.githubusercontent.com' `
+  -Audience 'api://AzureADTokenExchange' `
+  -Subject "repo:$($githubOrganizationName)/$($githubRepositoryName):environment:Production"
 
-# Create a new Azure AD service principal
-New-AzADServicePrincipal -AppId $applicationRegistration.AppId
+New-AzADAppFederatedCredential `
+  -Name 'TodoApp-production-branch' `
+  -ApplicationObjectId $productionApplicationRegistration.Id `
+  -Issuer 'https://token.actions.githubusercontent.com' `
+  -Audience 'api://AzureADTokenExchange' `
+  -Subject "repo:$($githubOrganizationName)/$($githubRepositoryName):ref:refs/heads/main"   
 
-# Assign the Contributor role to the application
+$testResourceGroup = Get-AzResourceGroup -Name rg_sb_southeastasia_89803_3_171226861654  ##change resourse group name
+
+New-AzADServicePrincipal -AppId $($testApplicationRegistration.AppId)
 New-AzRoleAssignment `
-  -ApplicationId $applicationRegistration.AppId `
+  -ApplicationId $($testApplicationRegistration.AppId) `
   -RoleDefinitionName Contributor `
-  -Scope $resourceGroup.ResourceId
+  -Scope $($testResourceGroup.ResourceId)
 
-  
-# Get the Azure context
+$productionResourceGroup = Get-AzResourceGroup -Name rg_sb_eastus_89803_1_171226861234 ##change resourse group name
+
+New-AzADServicePrincipal -AppId $($productionApplicationRegistration.AppId)
+New-AzRoleAssignment `
+  -ApplicationId $($productionApplicationRegistration.AppId) `
+  -RoleDefinitionName Contributor `
+  -Scope $($productionResourceGroup.ResourceId)
+
 $azureContext = Get-AzContext
-
-# Write the Azure secrets to the console
-Write-Host "AZURE_CLIENT_ID: $($applicationRegistration.AppId)"
+Write-Host "AZURE_CLIENT_ID_TEST: $($testApplicationRegistration.AppId)"
+Write-Host "AZURE_CLIENT_ID_PRODUCTION: $($productionApplicationRegistration.AppId)"
 Write-Host "AZURE_TENANT_ID: $($azureContext.Tenant.Id)"
 Write-Host "AZURE_SUBSCRIPTION_ID: $($azureContext.Subscription.Id)"   ## write these secrets to github secrets

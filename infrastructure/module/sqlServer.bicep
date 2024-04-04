@@ -1,6 +1,9 @@
 @description('Location for the resources')
 param location string = resourceGroup().location
 
+@description('The SKU of the SQL database.')
+param sku object
+
 @description('The administrator login username for the SQL server.')
 param sqlServerAdministratorLogin string
 
@@ -37,10 +40,7 @@ resource sqlDatabase 'Microsoft.Sql/servers/databases@2022-05-01-preview' = {
   parent: sqlServer
   name: sqlDatabaseName
   location: location
-  sku: {
-    name: 'Basic'
-    tier: 'Basic'
-  }
+  sku: sku
 }
 
 output sqlServerFullyQualifiedDomainName string = sqlServer.properties.fullyQualifiedDomainName

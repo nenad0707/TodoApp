@@ -16,17 +16,36 @@ jobs:
   lint:
     uses: ./.github/workflows/lint.yml
 
+  # Deploy the application and database to the test environment.
+  deploy-test:
+    uses: ./.github/workflows/deploy.yml
+    needs:
+      - lint
+      - build
+    with:
+      environmentType: Test
+      resourceGroupName: rg_sb_southeastasia_89803_3_171226861654
+      sqlServerAdministratorLogin: nenad
+    secrets:
+      AZURE_CLIENT_ID: ${{ secrets.AZURE_CLIENT_ID_TEST }}
+      AZURE_TENANT_ID: ${{ secrets.AZURE_TENANT_ID }}
+      AZURE_SUBSCRIPTION_ID: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
+      sqlServerAdministratorLoginPassword: ${{ secrets.SQLSERVERADMINISTRATORLOGINPASSWORD}}
+      jwtKey: ${{ secrets.JWTKEY }}
+
   # Deploy the application and database.
   deploy-production:
     uses: ./.github/workflows/deploy.yml
     needs:
       - lint
       - build
+      - deploy-test
     with:
-      resourceGroupName: rg_sb_eastus_89803_1_171225897934
+      environmentType: Production
+      resourceGroupName: rg_sb_eastus_89803_1_171226861234
       sqlServerAdministratorLogin: nenad
     secrets:
-      AZURE_CLIENT_ID: ${{ secrets.AZURE_CLIENT_ID }}
+      AZURE_CLIENT_ID: ${{  secrets.AZURE_CLIENT_ID_PRODUCTION }}
       AZURE_TENANT_ID: ${{ secrets.AZURE_TENANT_ID }}
       AZURE_SUBSCRIPTION_ID: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
       sqlServerAdministratorLoginPassword: ${{ secrets.SQLSERVERADMINISTRATORLOGINPASSWORD}}

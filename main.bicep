@@ -4,6 +4,13 @@ param appServicePlanName string = 'api-website-plan'
 @description('The location of the App Service Plan.')
 param location string = resourceGroup().location
 
+@description('Select the type of environment you want to provision. Allowed values are Production and Test.')
+@allowed([
+  'Production'
+  'Test'
+])
+param environmentType string
+
 @allowed([
   'F1'
   'D1'
@@ -17,9 +24,8 @@ param location string = resourceGroup().location
   'P2'
   'P3'
 ])
-@description('The pricing tier of the App Service Plan.')
-param appServicePlanSku string = 'B1'
-
+// @description('The pricing tier of the App Service Plan.')
+// param appServicePlanSku string = 'B1'
 @description('The settings of the App Service.')
 param appSettings array = []
 
@@ -40,12 +46,42 @@ param resourceNameSuffix string = uniqueString(resourceGroup().id)
 
 var sqlDatabaseName = 'TodoDb'
 
+var environmentConfigurationMap = {
+  Production: {
+    appServicePlan: {
+      sku: {
+        name: 'F1'
+        capacity: 1
+      }
+    }
+    sqlDatabase: {
+      sku: {
+        name: 'Basic'
+        tier: 'Basic'
+      }
+    }
+  }
+  Test: {
+    appServicePlan: {
+      sku: {
+        name: 'F1'
+      }
+    }
+    sqlDatabase: {
+      sku: {
+        name: 'Basic'
+        tier: 'Basic'
+      }
+    }
+  }
+}
+
 module appServicePlan 'infrastructure/module/appServicePlan.bicep' = {
   name: 'appServicePlanModule'
   params: {
     appServicePlanName: appServicePlanName
     location: location
-    sku: appServicePlanSku
+    sku: environmentConfigurationMap[environmentType].appServicePlan.sku
   }
 }
 var appServiceAppName = 'api-website-${resourceNameSuffix}'
@@ -70,6 +106,7 @@ module appService 'infrastructure/module/appService.bicep' = {
 module sqlServer 'infrastructure/module/sqlServer.bicep' = {
   name: 'sqlServerModule'
   params: {
+    sku: environmentConfigurationMap[environmentType].sqlDatabase.sku
     location: location
     sqlServerAdministratorLogin: sqlServerAdministratorLogin
     sqlServerAdministratorLoginPassword: sqlServerAdministratorLoginPassword
