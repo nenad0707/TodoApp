@@ -60,6 +60,7 @@ jobs:
             jwtKey=${{ secrets.jwtKey }}
           additionalArguments: --what-if
   deploy:
+    needs: validate
     environment: Production
     runs-on: ubuntu-latest
     outputs:
