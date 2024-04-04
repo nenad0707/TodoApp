@@ -23,15 +23,15 @@ $testApplicationRegistration = New-AzADApplication -DisplayName 'TodoApp-Test'
 # Create a new Azure AD application federated credential
 New-AzADAppFederatedCredential `
   -Name 'TodoApp-Test' `
-  -ApplicationObjectId $applicationRegistration.Id `
+  -ApplicationObjectId $testApplicationRegistration.Id `
   -Issuer 'https://token.actions.githubusercontent.com' `
   -Audience 'api://AzureADTokenExchange' `
   -Subject "repo:$($githubOrganizationName)/$($githubRepositoryName):environment:Test"
 
-# Create a new Azure AD application federated credential for the autobicepsuite-branch
+# Create a new Azure AD application federated credential for the TodoApp-test-branch
 New-AzADAppFederatedCredential `
   -Name 'TodoApp-test-branch' `
-  -ApplicationObjectId $applicationRegistration.Id `
+  -ApplicationObjectId $testApplicationRegistration.Id `
   -Issuer 'https://token.actions.githubusercontent.com' `
   -Audience 'api://AzureADTokenExchange' `
   -Subject "repo:$($githubOrganizationName)/$($githubRepositoryName):ref:refs/heads/main"
