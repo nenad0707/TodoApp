@@ -21,7 +21,44 @@ on:
       jwtKey:
         required: true
 jobs:
+  validate:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - uses: azure/login@v1
+        name: Sign in to Azure
+        with:
+          client-id: ${{ secrets.AZURE_CLIENT_ID }}
+          tenant-id: ${{ secrets.AZURE_TENANT_ID }}
+          subscription-id: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
+      - if: ${{github.job.environment}} != 'Production'
+        uses: azure/arm-deploy@v1
+        name: Run preflight validation
+        with:
+          deploymentName: ${{ github.run_number }}
+          resourceGroupName: ${{ inputs.resourceGroupName }}
+          template: main.bicep
+          parameters: >
+            main.parameters.json
+            sqlServerAdministratorLogin=${{ inputs.sqlServerAdministratorLogin }}
+            sqlServerAdministratorLoginPassword=${{ secrets.sqlServerAdministratorLoginPassword }}
+            jwtKey=${{ secrets.jwtKey }}
+          deploymentMode: Validate
+      - if: ${{github.job.environment}} == 'Production'
+        uses: azure/arm-deploy@v1
+        name: Run what-if
+        with:
+          failOnStdErr: false
+          resourceGroupName: ${{ inputs.resourceGroupName }}
+          template: main.bicep
+          parameters: >
+            main.parameters.json
+            sqlServerAdministratorLogin=${{ inputs.sqlServerAdministratorLogin }}
+            sqlServerAdministratorLoginPassword=${{ secrets.sqlServerAdministratorLoginPassword }}
+            jwtKey=${{ secrets.jwtKey }}
+          additionalArguments: --what-if
   deploy:
+    environment: Production
     runs-on: ubuntu-latest
     outputs:
       appServiceAppName: ${{ steps.deploy.outputs.appServiceAppName }}
