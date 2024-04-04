@@ -20,6 +20,14 @@ $githubRepositoryName = 'TodoApp'
 # Create a new Azure AD application
 $applicationRegistration = New-AzADApplication -DisplayName 'TodoApp'
 
+# Create a new Azure AD application federated credential
+New-AzADAppFederatedCredential `
+  -Name 'TodoApp' `
+  -ApplicationObjectId $applicationRegistration.Id `
+  -Issuer 'https://token.actions.githubusercontent.com' `
+  -Audience 'api://AzureADTokenExchange' `
+  -Subject "repo:$($githubOrganizationName)/$($githubRepositoryName):environment:Production"
+
 # Create a new Azure AD application federated credential for the autobicepsuite-branch
 New-AzADAppFederatedCredential `
   -Name 'TodoApp-branch' `
