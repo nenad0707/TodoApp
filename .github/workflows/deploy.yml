@@ -47,6 +47,7 @@ jobs:
             sqlServerAdministratorLogin=${{ inputs.sqlServerAdministratorLogin }}
             sqlServerAdministratorLoginPassword=${{ secrets.sqlServerAdministratorLoginPassword }}
             jwtKey=${{ secrets.jwtKey }}
+            environmentType=${{ inputs.environmentType }}
           deploymentMode: Validate
       - if: inputs.environmentType == 'Production'
         uses: azure/arm-deploy@v1
@@ -61,6 +62,7 @@ jobs:
             sqlServerAdministratorLogin=${{ inputs.sqlServerAdministratorLogin }}
             sqlServerAdministratorLoginPassword=${{ secrets.sqlServerAdministratorLoginPassword }}
             jwtKey=${{ secrets.jwtKey }}
+            environmentType=${{ inputs.environmentType }}
           additionalArguments: --what-if
   deploy:
     needs: validate
