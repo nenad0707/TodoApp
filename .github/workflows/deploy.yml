@@ -95,6 +95,7 @@ jobs:
             sqlServerAdministratorLogin=${{ inputs.sqlServerAdministratorLogin }}
             sqlServerAdministratorLoginPassword=${{ secrets.sqlServerAdministratorLoginPassword }}
             jwtKey=${{ secrets.jwtKey }}
+            environmentType=${{ inputs.environmentType }}
 
   deploy-website:
     needs: deploy
