@@ -64,7 +64,7 @@ var environmentConfigurationMap = {
   Test: {
     appServicePlan: {
       sku: {
-        name: 'F1'
+        name: 'B1'
       }
     }
     sqlDatabase: {
