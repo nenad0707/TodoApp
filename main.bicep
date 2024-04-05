@@ -1,5 +1,5 @@
 @description('The name of the App Service Plan.')
-param appServicePlanName string = 'api-website-plan'
+param appServicePlanName string = 'api-website-plan${environmentType}'
 
 @description('The location of the App Service Plan.')
 param location string = resourceGroup().location

@@ -4,11 +4,23 @@ on:
   workflow_call:
 
 jobs:
+  # This workflow contains two jobs, one for building the website and one for building the database
   build-application:
     name: Build Application
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3
+
+      - name: Cache .NET packages
+        uses: actions/cache@v2
+        with:
+          path: ~/.nuget/packages
+          key: ${{ runner.os }}-nuget-${{ hashFiles('**/TodoApp.sln') }}
+          restore-keys: |
+            ${{ runner.os }}-nuget-
+
+      - name: Restore dependencies
+        run: dotnet restore TodoApp.sln
 
       - name: Install .NET Core SDK
         uses: actions/setup-dotnet@v3
@@ -29,6 +41,7 @@ jobs:
         with:
           name: website
           path: ./TodoApi/bin/Release/net8.0/publish/publish.zip
+  # This job builds the database project
   build-database:
     name: Build database
     runs-on: windows-latest
