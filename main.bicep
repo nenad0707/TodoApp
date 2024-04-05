@@ -49,10 +49,7 @@ var sqlDatabaseName = 'TodoDb'
 var environmentConfigurationMap = {
   Production: {
     appServicePlan: {
-      sku: {
-        name: 'B1'
-        capacity: 1
-      }
+      sku: 'B1'
     }
     sqlDatabase: {
       sku: {
@@ -63,9 +60,7 @@ var environmentConfigurationMap = {
   }
   Test: {
     appServicePlan: {
-      sku: {
-        name: 'B1'
-      }
+      sku: 'B1'
     }
     sqlDatabase: {
       sku: {
