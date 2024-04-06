@@ -24,7 +24,7 @@ jobs:
       - build
     with:
       environmentType: Test
-      resourceGroupName: rg_sb_southeastasia_89803_3_171234667736
+      resourceGroupName: rg_sb_southeastasia_89803_3_171243429928
       sqlServerAdministratorLogin: nenad
     secrets:
       AZURE_CLIENT_ID: ${{ secrets.AZURE_CLIENT_ID_TEST }}
@@ -42,7 +42,7 @@ jobs:
       - deploy-test
     with:
       environmentType: Production
-      resourceGroupName: rg_sb_eastus_89803_1_171234667420
+      resourceGroupName: rg_sb_eastus_89803_1_171243429770
       sqlServerAdministratorLogin: nenad
     secrets:
       AZURE_CLIENT_ID: ${{  secrets.AZURE_CLIENT_ID_PRODUCTION }}
