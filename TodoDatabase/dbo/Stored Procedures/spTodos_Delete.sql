@@ -6,5 +6,6 @@ BEGIN
 	DELETE FROM dbo.Todos
 	WHERE [AssignedTo] = @AssignedTo
 		AND [Id] = @TodoId;
+	RETURN @@ROWCOUNT;
 END
 

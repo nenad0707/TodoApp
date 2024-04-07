@@ -1,16 +1,24 @@
-﻿using TodoLibrary.DataAccess;
-using TodoLibrary;
-using Microsoft.AspNetCore.Authorization;
+﻿using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.IdentityModel.Tokens;
-using System.Text;
 using Microsoft.OpenApi.Models;
-using Microsoft.AspNetCore.Authentication.JwtBearer;
+using System.Reflection;
+using System.Text;
 using TodoApi.Services;
+using TodoLibrary;
+using TodoLibrary.DataAccess;
 
 namespace TodoApi.StartupConfig;
 
+
+/// <summary>
+/// Provides extension methods for configuring dependency injection in the application.
+/// </summary>
 public static class DependencyInjectionExtensions
 {
+    /// <summary>
+    /// Adds standard services to the dependency injection container.
+    /// </summary>
+    /// <param name="builder">The <see cref="WebApplicationBuilder"/> instance.</param>
     public static void AddStandardServices(this WebApplicationBuilder builder)
     {
         builder.Services.AddControllers();
@@ -18,6 +26,13 @@ public static class DependencyInjectionExtensions
         builder.Services.AddSwaggerGen(c =>
         {
             c.SwaggerDoc("v1", new OpenApiInfo { Title = "My API", Version = "v1" });
+
+            var xmlFile = $"{Assembly.GetExecutingAssembly().GetName().Name}.xml";
+
+            var xmlPath = Path.Combine(AppContext.BaseDirectory, xmlFile);
+
+            c.IncludeXmlComments(xmlPath);
+
             c.AddSecurityDefinition("Bearer", new OpenApiSecurityScheme
             {
                 Description = "JWT Authorization header using the Bearer scheme.",
@@ -26,6 +41,7 @@ public static class DependencyInjectionExtensions
                 Type = SecuritySchemeType.ApiKey,
                 Scheme = "Bearer"
             });
+
             c.AddSecurityRequirement(new OpenApiSecurityRequirement()
             {
                 {
@@ -43,11 +59,15 @@ public static class DependencyInjectionExtensions
                     new List<string>()
                 }
             });
-                });
+        });
 
         builder.Services.AddHttpContextAccessor();
     }
 
+    /// <summary>
+    /// Adds custom services to the dependency injection container.
+    /// </summary>
+    /// <param name="builder">The <see cref="WebApplicationBuilder"/> instance.</param>
     public static void AddCustomServices(this WebApplicationBuilder builder)
     {
         builder.Services.AddSingleton<ISqlDataAccess, SqlDataAccess>();
@@ -55,6 +75,10 @@ public static class DependencyInjectionExtensions
         builder.Services.AddScoped<IUserRepository, UserRepository>();
     }
 
+    /// <summary>
+    /// Adds authentication services to the dependency injection container.
+    /// </summary>
+    /// <param name="builder">The <see cref="WebApplicationBuilder"/> instance.</param>
     public static void AddAuthServices(this WebApplicationBuilder builder)
     {
         var jwtSection = builder.Configuration.GetSection("Jwt");
@@ -81,7 +105,10 @@ public static class DependencyInjectionExtensions
         });
     }
 
-
+    /// <summary>
+    /// Adds health check services to the dependency injection container.
+    /// </summary>
+    /// <param name="builder">The <see cref="WebApplicationBuilder"/> instance.</param>
     public static void AddHealthChecks(this WebApplicationBuilder builder)
     {
         builder.Services.AddHealthChecks()
