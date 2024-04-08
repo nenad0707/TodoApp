@@ -8,4 +8,5 @@ BEGIN
 	SET [Task] = @Task
 	WHERE [AssignedTo] = @AssignedTo
 		AND [Id] = @TodoId;
+	SELECT @@ROWCOUNT
 END

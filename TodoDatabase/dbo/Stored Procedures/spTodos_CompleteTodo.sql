@@ -7,4 +7,5 @@ BEGIN
 	SET [IsCompleted] = 1
 	WHERE [AssignedTo] = @AssignedTo
 		AND [Id] = @TodoId;
+	SELECT @@ROWCOUNT
 END

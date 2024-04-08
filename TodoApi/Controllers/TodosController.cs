@@ -1,4 +1,5 @@
 ﻿using Microsoft.AspNetCore.Mvc;
+using System.Data.SqlClient;
 using System.Security.Claims;
 using TodoLibrary;
 using TodoLibrary.Models;
@@ -70,6 +71,11 @@ public class TodosController : ControllerBase
         {
             var output = await _data.GetOneAssigned(GetUserId(), todoId);
 
+            if (output is null)
+            {
+                return NotFound(new { message = "Todo not found." });
+            }
+
             return Ok(output);
         }
         catch (Exception ex)
@@ -121,16 +127,28 @@ public class TodosController : ControllerBase
 
         try
         {
-            await _data.UpdateTask(GetUserId(), todoId, task);
+            var affectedRows = await _data.UpdateTask(GetUserId(), todoId, task);
 
-            return Ok();
+            if (affectedRows == 0)
+            {
+                _logger.LogWarning("No task was updated for TodoId: {TodoId}", todoId);
+                return NotFound(new { message = "Task not found or no changes made." });
+            }
+
+            return Ok(new { message = "Task updated successfully.", affectedRows = affectedRows });
+        }
+        catch (SqlException ex)
+        {
+            _logger.LogError(ex, "A SQL error occurred while updating Todo with TodoId: {TodoId}. The task value was {Task}", todoId, task);
+            return StatusCode(StatusCodes.Status500InternalServerError, new { message = "A database error occurred." });
         }
         catch (Exception ex)
         {
             _logger.LogError(ex, "The PUT call to api/Todos/{TodoId} failed. The task value was {Task}", todoId, task);
-            return BadRequest();
+            return BadRequest(new { message = "An error occurred while updating the task." });
         }
     }
+
 
     // PUT api/Todos/5/Complete
     /// <summary>
@@ -145,16 +163,24 @@ public class TodosController : ControllerBase
 
         try
         {
-            await _data.CompleteTodo(GetUserId(), todoId);
+            var rowsAffected = await _data.CompleteTodo(GetUserId(), todoId);
 
-            return Ok();
+            if (rowsAffected == 0)
+            {
+                _logger.LogWarning("Todo with TodoId: {TodoId} was not marked as complete.", todoId);
+                return NotFound(new { message = "Todo not found or already completed." });
+            }
+
+            _logger.LogInformation("Todo with TodoId: {TodoId} marked as complete successfully.", todoId);
+            return Ok(new { message = "Todo marked as complete successfully.", rowsAffected });
         }
         catch (Exception ex)
         {
             _logger.LogError(ex, "The PUT call to api/Todos/{TodoId}/Complete failed.", todoId);
-            return BadRequest();
+            return BadRequest(new { message = "An error occurred while marking the todo as complete." });
         }
     }
+
 
     // DELETE api/Todos/5
     /// <summary>
@@ -173,15 +199,23 @@ public class TodosController : ControllerBase
 
             if (rowsAffected == 0)
             {
-                return NotFound();
+                _logger.LogWarning("Todo with TodoId: {TodoId} not found for deletion.", todoId);
+                return NotFound(new { message = "Todo not found." });
             }
 
-            return Ok();
+            _logger.LogInformation("Todo with TodoId: {TodoId} deleted successfully.", todoId);
+            return Ok(new { message = "Todo deleted successfully.", rowsAffected });
+        }
+        catch (SqlException ex)
+        {
+            _logger.LogError(ex, "A SQL error occurred while deleting Todo with TodoId: {TodoId}.", todoId);
+            return StatusCode(StatusCodes.Status500InternalServerError, new { message = "A database error occurred." });
         }
         catch (Exception ex)
         {
             _logger.LogError(ex, "The DELETE call to api/Todos/{TodoId} failed.", todoId);
-            return BadRequest();
+            return BadRequest(new { message = "An error occurred while deleting the todo." });
         }
     }
+
 }

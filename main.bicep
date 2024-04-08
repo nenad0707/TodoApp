@@ -11,21 +11,6 @@ param location string = resourceGroup().location
 ])
 param environmentType string
 
-// @allowed([
-//   'F1'
-//   'D1'
-//   'B1'
-//   'B2'
-//   'B3'
-//   'S1'
-//   'S2'
-//   'S3'
-//   'P1'
-//   'P2'
-//   'P3'
-// ])
-// @description('The pricing tier of the App Service Plan.')
-// param appServicePlanSku string = 'B1'
 @description('The settings of the App Service.')
 param appSettings array = []
 

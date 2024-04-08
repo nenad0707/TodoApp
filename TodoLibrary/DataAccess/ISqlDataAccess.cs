@@ -25,16 +25,5 @@ namespace TodoLibrary.DataAccess
         /// <param name="parameters">The parameters for the stored procedure.</param>
         /// <param name="connectionStringName">The name of the connection string.</param>
         /// <returns>A task representing the asynchronous operation.</returns>
-        Task SaveData<T>(string storedProcedure, T parameters, string connectionStringName);
-
-        /// <summary>
-        /// Executes a delete stored procedure using the specified stored procedure, parameters, and connection string name.
-        /// </summary>
-        /// <typeparam name="T">The type of the parameters.</typeparam>
-        /// <param name="storedProcedure">The name of the stored procedure.</param>
-        /// <param name="parameters">The parameters for the stored procedure.</param>
-        /// <param name="connectionStringName">The name of the connection string.</param>
-        /// <returns>A task representing the asynchronous operation that returns the number of rows affected.</returns>
-        Task<int> ExecuteDeleteStoredProcedure<T>(string storedProcedure, T parameters, string connectionStringName);
-    }
+        Task<int> SaveData<T>(string storedProcedure, T parameters, string connectionStringName);    }
 }

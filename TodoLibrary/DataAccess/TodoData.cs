@@ -60,9 +60,10 @@ public class TodoData : ITodoData
     /// <param name="todoId">The ID of the todo item to update.</param>
     /// <param name="task">The new task description for the todo item.</param>
     /// <returns>A task that represents the asynchronous operation.</returns>
-    public Task UpdateTask(int assignedTo, int todoId, string task)
+    public async Task<int> UpdateTask(int assignedTo, int todoId, string task)
     {
-        return _sql.SaveData<dynamic>("dbo.spTodos_UpdateTask", new { AssignedTo = assignedTo, TodoId = todoId, Task = task }, "Default");
+
+        return await _sql.SaveData("dbo.spTodos_UpdateTask", new { AssignedTo = assignedTo, TodoId = todoId, Task = task }, "Default");
     }
 
     /// <summary>
@@ -71,7 +72,7 @@ public class TodoData : ITodoData
     /// <param name="assignedTo">The ID of the user to whom the todo item is assigned.</param>
     /// <param name="todoId">The ID of the todo item to mark as completed.</param>
     /// <returns>A task that represents the asynchronous operation.</returns>
-    public Task CompleteTodo(int assignedTo, int todoId)
+    public Task<int> CompleteTodo(int assignedTo, int todoId)
     {
         return _sql.SaveData<dynamic>("dbo.spTodos_CompleteTodo", new { AssignedTo = assignedTo, TodoId = todoId }, "Default");
     }
@@ -84,6 +85,6 @@ public class TodoData : ITodoData
     /// <returns>A task that represents the asynchronous operation. The task result contains the number of rows affected by the delete operation.</returns>
     public async Task<int> Delete(int assignedTo, int todoId)
     {
-        return await _sql.ExecuteDeleteStoredProcedure<dynamic>("dbo.spTodos_Delete", new { AssignedTo = assignedTo, TodoId = todoId }, "Default");
+        return await _sql.SaveData("dbo.spTodos_Delete", new { AssignedTo = assignedTo, TodoId = todoId }, "Default");
     }
 }

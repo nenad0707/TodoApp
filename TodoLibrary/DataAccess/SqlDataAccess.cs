@@ -47,33 +47,15 @@ public class SqlDataAccess : ISqlDataAccess
     /// <param name="parameters">The parameters for the stored procedure.</param>
     /// <param name="connectionStringName">The name of the connection string in the configuration.</param>
     /// <returns>A task representing the asynchronous operation.</returns>
-    public async Task SaveData<T>(string storedProcedure, T parameters, string connectionStringName)
+    public async Task<int> SaveData<T>(string storedProcedure, T parameters, string connectionStringName)
     {
         string connectionString = _config.GetConnectionString(connectionStringName)!;
 
         using IDbConnection connection = new SqlConnection(connectionString);
-
-        await connection.ExecuteAsync(storedProcedure, parameters, commandType: CommandType.StoredProcedure);
+        return await connection.ExecuteAsync(storedProcedure, parameters, commandType: CommandType.StoredProcedure);
     }
 
-    /// <summary>
-    /// Executes a stored procedure that deletes data from the database.
-    /// </summary>
-    /// <typeparam name="T">The type of parameters for the stored procedure.</typeparam>
-    /// <param name="storedProcedure">The name of the stored procedure.</param>
-    /// <param name="parameters">The parameters for the stored procedure.</param>
-    /// <param name="connectionStringName">The name of the connection string in the configuration.</param>
-    /// <returns>The number of rows affected by the delete operation.</returns>
-    public async Task<int> ExecuteDeleteStoredProcedure<T>(string storedProcedure, T parameters, string connectionStringName)
-    {
-        string connectionString = _config.GetConnectionString(connectionStringName)!;
-
-        using IDbConnection connection = new SqlConnection(connectionString);
-
-        var rowsAffected = await connection.ExecuteAsync(storedProcedure, parameters, commandType: CommandType.StoredProcedure);
-
-        return rowsAffected;
-    }
+  
 
 }
 
