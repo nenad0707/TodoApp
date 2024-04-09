@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Authentication.JwtBearer;
+﻿using AspNetCoreRateLimit;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.RateLimiting;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
@@ -136,15 +137,18 @@ public static class DependencyInjectionExtensions
     /// <param name="builder">The <see cref="WebApplicationBuilder"/> instance.</param>
     public static void AddRateLimitingService(this WebApplicationBuilder builder)
     {
-        builder.Services.AddRateLimiter(options =>
-        {
-            options.AddFixedWindowLimiter("fixed_policy", policyOptions =>
-            {
-                policyOptions.PermitLimit = 50;
-                policyOptions.Window = TimeSpan.FromSeconds(12);
-                policyOptions.QueueProcessingOrder = QueueProcessingOrder.OldestFirst;
-                policyOptions.QueueLimit = 1;
-            });
-        });
+        builder.Services.AddMemoryCache();
+
+        builder.Services.Configure<IpRateLimitOptions>(builder.Configuration.GetSection("IpRateLimiting"));
+
+        builder.Services.AddScoped<IIpPolicyStore, MemoryCacheIpPolicyStore>();
+
+        builder.Services.AddScoped<IRateLimitCounterStore, MemoryCacheRateLimitCounterStore>();
+
+        builder.Services.AddSingleton<IRateLimitConfiguration, RateLimitConfiguration>();
+
+        builder.Services.AddSingleton<IProcessingStrategy,AsyncKeyLockProcessingStrategy>();
+
+        builder.Services.AddInMemoryRateLimiting();
     }
 }

@@ -15,7 +15,6 @@ namespace TodoApi.Controllers;
 /// Controller for handling authentication-related operations.
 /// </summary>
 [Route("api/[controller]")]
-[EnableRateLimiting("fixed_policy")]
 [ApiController]
 public class AuthController : ControllerBase
 {

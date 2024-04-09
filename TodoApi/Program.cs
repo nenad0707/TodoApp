@@ -1,3 +1,4 @@
+using AspNetCoreRateLimit;
 using TodoApi.StartupConfig;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -24,17 +25,20 @@ app.UseSwaggerUI(c =>
 });
 
 
+
 app.UseHttpsRedirection();
+
 
 app.UseStaticFiles();
 
-app.UseRateLimiter();
 
 app.UseAuthentication();
 
 app.UseAuthorization();
 
 app.MapControllers();
+
+app.UseIpRateLimiting();
 
 app.MapHealthChecks("/health").AllowAnonymous();
 
