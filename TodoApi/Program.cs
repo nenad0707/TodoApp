@@ -9,6 +9,7 @@ builder.AddAuthServices();
 builder.AddHealthChecks();
 builder.AddCustomServices();
 builder.AddSerilogServices();
+builder.AddRateLimitingService();
 
 var app = builder.Build();
 
@@ -26,6 +27,8 @@ app.UseSwaggerUI(c =>
 app.UseHttpsRedirection();
 
 app.UseStaticFiles();
+
+app.UseRateLimiter();
 
 app.UseAuthentication();
 

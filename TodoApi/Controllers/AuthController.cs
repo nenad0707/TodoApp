@@ -1,4 +1,5 @@
 ﻿using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.RateLimiting;
 using Microsoft.IdentityModel.Tokens;
 using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
@@ -14,6 +15,7 @@ namespace TodoApi.Controllers;
 /// Controller for handling authentication-related operations.
 /// </summary>
 [Route("api/[controller]")]
+[EnableRateLimiting("fixed_policy")]
 [ApiController]
 public class AuthController : ControllerBase
 {

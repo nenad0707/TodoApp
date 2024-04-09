@@ -1,9 +1,11 @@
 ﻿using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.AspNetCore.RateLimiting;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
 using Serilog;
 using System.Reflection;
 using System.Text;
+using System.Threading.RateLimiting;
 using TodoApi.Services;
 using TodoLibrary;
 using TodoLibrary.DataAccess;
@@ -126,5 +128,23 @@ public static class DependencyInjectionExtensions
                    .ReadFrom.Configuration(hostingContext.Configuration)
                               .Enrich.FromLogContext()
                                          .WriteTo.Console());
+    }
+
+    /// <summary>
+    /// Adds rate limiting service to the dependency injection container.
+    /// </summary>
+    /// <param name="builder">The <see cref="WebApplicationBuilder"/> instance.</param>
+    public static void AddRateLimitingService(this WebApplicationBuilder builder)
+    {
+        builder.Services.AddRateLimiter(options =>
+        {
+            options.AddFixedWindowLimiter("fixed_policy", policyOptions =>
+            {
+                policyOptions.PermitLimit = 50;
+                policyOptions.Window = TimeSpan.FromSeconds(12);
+                policyOptions.QueueProcessingOrder = QueueProcessingOrder.OldestFirst;
+                policyOptions.QueueLimit = 1;
+            });
+        });
     }
 }
