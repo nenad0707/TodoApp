@@ -147,8 +147,26 @@ public static class DependencyInjectionExtensions
 
         builder.Services.AddSingleton<IRateLimitConfiguration, RateLimitConfiguration>();
 
-        builder.Services.AddSingleton<IProcessingStrategy,AsyncKeyLockProcessingStrategy>();
+        builder.Services.AddSingleton<IProcessingStrategy, AsyncKeyLockProcessingStrategy>();
 
         builder.Services.AddInMemoryRateLimiting();
+    }
+
+    /// <summary>
+    /// Adds CORS services to the dependency injection container.
+    /// </summary>
+    /// <param name="builder">The <see cref="WebApplicationBuilder"/> instance.</param>
+    public static void AddCorsServices(this WebApplicationBuilder builder)
+    {
+        builder.Services.AddCors(options =>
+        {
+            options.AddPolicy("AllowAllOrigins",
+                builder =>
+                {
+                    builder.AllowAnyOrigin() // i can also use .WithOrigins("http://localhost:3000") or any other origin from azure when deployed my client app
+                           .AllowAnyMethod()
+                           .AllowAnyHeader();
+                });
+        });
     }
 }

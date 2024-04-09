@@ -9,6 +9,7 @@ builder.AddStandardServices();
 builder.AddAuthServices();
 builder.AddHealthChecks();
 builder.AddCustomServices();
+builder.AddCorsServices();
 builder.AddSerilogServices();
 builder.AddRateLimitingService();
 
@@ -24,13 +25,11 @@ app.UseSwaggerUI(c =>
     c.InjectStylesheet("/css/theme-material.css");
 });
 
-
-
 app.UseHttpsRedirection();
 
+app.UseCors("AllowAllOrigins");
 
 app.UseStaticFiles();
-
 
 app.UseAuthentication();
 
