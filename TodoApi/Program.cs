@@ -8,6 +8,7 @@ builder.AddStandardServices();
 builder.AddAuthServices();
 builder.AddHealthChecks();
 builder.AddCustomServices();
+builder.AddSerilogServices();
 
 var app = builder.Build();
 

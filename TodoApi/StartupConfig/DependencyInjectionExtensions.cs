@@ -1,6 +1,7 @@
 ﻿using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
+using Serilog;
 using System.Reflection;
 using System.Text;
 using TodoApi.Services;
@@ -113,5 +114,17 @@ public static class DependencyInjectionExtensions
     {
         builder.Services.AddHealthChecks()
             .AddSqlServer(builder.Configuration.GetConnectionString("Default")!);
+    }
+
+    /// <summary>
+    /// Adds Serilog services to the dependency injection container.
+    /// </summary>
+    /// <param name="builder">The <see cref="WebApplicationBuilder"/> instance.</param>
+    public static void AddSerilogServices(this WebApplicationBuilder builder)
+    {
+        builder.Host.UseSerilog((hostingContext, loggerConfiguration) => loggerConfiguration
+                   .ReadFrom.Configuration(hostingContext.Configuration)
+                              .Enrich.FromLogContext()
+                                         .WriteTo.Console());
     }
 }
