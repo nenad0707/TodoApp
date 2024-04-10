@@ -41,7 +41,7 @@ jobs:
           scope: resourcegroup
           deploymentName: ${{ github.run_number }}
           resourceGroupName: ${{ inputs.resourceGroupName }}
-          template: ./insfrastructure/deploy/main.bicep
+          template: ./infrastructure/deploy/main.bicep
           parameters: >
             sqlServerAdministratorLogin=${{ inputs.sqlServerAdministratorLogin }}
             sqlServerAdministratorLoginPassword=${{ secrets.sqlServerAdministratorLoginPassword }}
@@ -55,7 +55,7 @@ jobs:
           scope: resourcegroup
           failOnStdErr: false
           resourceGroupName: ${{ inputs.resourceGroupName }}
-          template: ./insfrastructure/deploy/main.bicep
+          template: ./infrastructure/deploy/main.bicep
           parameters: >
             sqlServerAdministratorLogin=${{ inputs.sqlServerAdministratorLogin }}
             sqlServerAdministratorLoginPassword=${{ secrets.sqlServerAdministratorLoginPassword }}
@@ -87,7 +87,7 @@ jobs:
           failOnStdErr: false
           deploymentName: ${{ github.run_number }}
           resourceGroupName: ${{ inputs.resourceGroupName }}
-          template: ./insfrastructure/deploy/main.bicep
+          template: ./infrastructure/deploy/main.bicep
           parameters: >
             sqlServerAdministratorLogin=${{ inputs.sqlServerAdministratorLogin }}
             sqlServerAdministratorLoginPassword=${{ secrets.sqlServerAdministratorLoginPassword }}
