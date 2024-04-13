@@ -41,7 +41,7 @@ public class TodosController : ControllerBase
     /// </summary>
     /// <returns>List of Todo items.</returns>
     [HttpGet]
-    [ResponseCache(Duration = 60, Location = ResponseCacheLocation.Any)]
+    [ResponseCache(Duration = 15, Location = ResponseCacheLocation.Any)]
     public async Task<ActionResult<List<TodoModel>>> Get()
     {
         _logger.LogInformation("GET api/Todos called.");
@@ -66,7 +66,7 @@ public class TodosController : ControllerBase
     /// <param name="todoId">The ID of the Todo item.</param>
     /// <returns>The Todo item.</returns>
     [HttpGet("{todoId}")]
-    [ResponseCache(Duration = 10, Location = ResponseCacheLocation.Any)]
+    [ResponseCache(Duration = 15, Location = ResponseCacheLocation.Any)]
     public async Task<ActionResult<TodoModel>> Get(int todoId)
     {
         _logger.LogInformation("GET api/Todos/{TodoId} called.", todoId);
