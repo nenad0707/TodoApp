@@ -1,12 +1,10 @@
 ﻿using AspNetCoreRateLimit;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
-using Microsoft.AspNetCore.RateLimiting;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
 using Serilog;
 using System.Reflection;
 using System.Text;
-using System.Threading.RateLimiting;
 using TodoApi.Services;
 using TodoLibrary;
 using TodoLibrary.DataAccess;
