@@ -31,6 +31,8 @@ To use the API, users need to:
 
 The project uses Azure Bicep for infrastructure as code. The Bicep files define the resources needed for the project, such as the App Service and SQL Server.
 
+![Azure Infrastructure](./docs/azure-infrastructure.png)
+
 ## Azure Scripts 📜
 
 The project includes Azure scripts for deploying the infrastructure and the application. The scripts use the Azure CLI and PowerShell.
