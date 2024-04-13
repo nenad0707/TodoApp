@@ -1,5 +1,7 @@
 # Todo API Project 📝
 
+[![deploy-api-website-with-database](https://github.com/nenad0707/TodoApp/actions/workflows/workflow.yml/badge.svg)](https://github.com/nenad0707/TodoApp/actions/workflows/workflow.yml)
+
 This project is a Todo API that allows users to manage their todo tasks.
 
 ## About the API 📡
