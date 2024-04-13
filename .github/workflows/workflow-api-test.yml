@@ -24,7 +24,7 @@ jobs:
       - build
     with:
       environmentType: Production
-      resourceGroupName: rg_sb_eastus_89803_1_171286435353
+      resourceGroupName: rg_sb_eastus_89803_1_171303635511
       sqlServerAdministratorLogin: nenad
     secrets:
       AZURE_CLIENT_ID: ${{  secrets.AZURE_CLIENT_ID }}

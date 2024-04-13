@@ -10,7 +10,7 @@ $context = Get-AzSubscription -SubscriptionName PAYG-Sandboxes
 Set-AzContext $context
 
 # Set the default resource group
-Set-AzDefault -ResourceGroupName rg_sb_eastus_89803_1_171286435353
+Set-AzDefault -ResourceGroupName rg_sb_eastus_89803_1_171303635511
 ##change resourse group name
 
 # Set the GitHub organization and repository names
@@ -18,7 +18,7 @@ $githubOrganizationName = 'nenad0707'
 $githubRepositoryName = 'TodoApp'
 
 # Create a new Azure AD application
-$applicationRegistration = New-AzADApplication -DisplayName 'autobicepsuite'
+$applicationRegistration = New-AzADApplication -DisplayName 'TodoApi'
 
 # Create a new Azure AD application federated credential
 New-AzADAppFederatedCredential `
@@ -37,7 +37,7 @@ New-AzADAppFederatedCredential `
   -Subject "repo:$($githubOrganizationName)/$($githubRepositoryName):ref:refs/heads/main"
 
 # Get the resource group
-$resourceGroup = Get-AzResourceGroup -Name rg_sb_eastus_89803_1_171286435353
+$resourceGroup = Get-AzResourceGroup -Name rg_sb_eastus_89803_1_171303635511
 
 
 # Create a new Azure AD service principal
