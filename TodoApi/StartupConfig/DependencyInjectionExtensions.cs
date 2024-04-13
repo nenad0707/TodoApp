@@ -66,6 +66,8 @@ public static class DependencyInjectionExtensions
         });
 
         builder.Services.AddHttpContextAccessor();
+
+        builder.Services.AddResponseCaching();
     }
 
     /// <summary>

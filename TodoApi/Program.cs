@@ -27,7 +27,11 @@ app.UseSwaggerUI(c =>
 
 app.UseHttpsRedirection();
 
+app.UseIpRateLimiting();
+
 app.UseCors("AllowAllOrigins");
+
+app.UseResponseCaching();
 
 app.UseStaticFiles();
 
@@ -36,8 +40,6 @@ app.UseAuthentication();
 app.UseAuthorization();
 
 app.MapControllers();
-
-app.UseIpRateLimiting();
 
 app.MapHealthChecks("/health").AllowAnonymous();
 
