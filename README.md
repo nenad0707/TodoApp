@@ -33,6 +33,10 @@ The project uses Azure Bicep for infrastructure as code. The Bicep files define 
 
 ![Azure Infrastructure](./docs/azure-infrastructure.png)
 
+## ⚠️ Note
+
+The Azure resources used in this project are temporary as they are part of an Azure Cloud Sandbox which was purchased temporarily. Please ensure to replace these resources with your own before deploying the project.
+
 ## Azure Scripts 📜
 
 The project includes Azure scripts for deploying the infrastructure and the application. The scripts use the Azure CLI and PowerShell.
@@ -44,3 +48,7 @@ The project uses GitHub Actions for continuous integration and continuous deploy
 ## Conclusion 🏁
 
 This project demonstrates a complete workflow for a Todo API, from development to deployment. It shows how to use .NET Core, Dapper, SSDT, JWT, Azure Bicep, Azure scripts, and GitHub Actions in a real-world scenario.
+
+## 📝 License
+
+This project is [MIT](https://opensource.org/licenses/MIT) licensed.
