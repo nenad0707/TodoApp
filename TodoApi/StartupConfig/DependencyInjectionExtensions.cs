@@ -77,6 +77,7 @@ public static class DependencyInjectionExtensions
         builder.Services.AddSingleton<ISqlDataAccess, SqlDataAccess>();
         builder.Services.AddSingleton<ITodoData, TodoData>();
         builder.Services.AddScoped<IUserRepository, UserRepository>();
+        builder.Services.AddScoped<IAuthenticationService, AuthenticationService>();
     }
 
     /// <summary>

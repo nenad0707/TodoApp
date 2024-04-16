@@ -1,343 +1,160 @@
 ﻿using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
 using Moq;
 using System.Security.Claims;
 using TodoApi.Controllers;
-using TodoApi.Services;
-using TodoLibrary;
 using TodoLibrary.Models;
+using TodoLibrary;
+using System.Data.SqlClient;
+
 
 namespace TodoApi.Tests;
-
-
-
 public class TodosControllerTests
 {
+    private readonly Mock<ITodoData> _todoDataMock;
+    private readonly Mock<ILogger<TodosController>> _loggerMock;
     private readonly TodosController _todosController;
-    private readonly Mock<ITodoData> _mockTodoData;
-    private readonly Mock<ILogger<TodosController>> _mockLogger;
-    private readonly AuthController _authController;
-    private readonly Mock<IConfiguration> _mockConfiguration;
-    private readonly Mock<IUserRepository> _mockUserRepository;
+    private readonly ControllerContext _controllerContext;
+
     public TodosControllerTests()
     {
-        _mockTodoData = new Mock<ITodoData>();
-        _mockLogger = new Mock<ILogger<TodosController>>();
-        _mockConfiguration = new Mock<IConfiguration>();
-        _mockUserRepository = new Mock<IUserRepository>();
+        _todoDataMock = new Mock<ITodoData>();
+        _loggerMock = new Mock<ILogger<TodosController>>();
+        _todosController = new TodosController(_todoDataMock.Object, _loggerMock.Object);
 
-        // Configurations for JWT
-        _mockConfiguration.SetupGet(c => c["Jwt:Key"]).Returns("your_jwt_secret_key");
-        _mockConfiguration.SetupGet(c => c["Jwt:Issuer"]).Returns("your_jwt_issuer");
-        _mockConfiguration.SetupGet(c => c["Jwt:Audience"]).Returns("your_jwt_audience");
-
-        _authController = new AuthController(_mockConfiguration.Object, _mockUserRepository.Object);
-
-        _todosController = new TodosController(_mockTodoData.Object, _mockLogger.Object);
-
-        _todosController.ControllerContext = new ControllerContext
+        var user = new ClaimsPrincipal(new ClaimsIdentity(new Claim[]
         {
-            HttpContext = new DefaultHttpContext
-            {
-                User = new ClaimsPrincipal(new ClaimsIdentity(new Claim[]
-                {
-                    new Claim(ClaimTypes.NameIdentifier, "1")
-                }, "TestAuthentication"))
-            }
+            new Claim(ClaimTypes.NameIdentifier, "1"),
+        }, "mock"));
+
+        _controllerContext = new ControllerContext()
+        {
+            HttpContext = new DefaultHttpContext() { User = user }
         };
 
+        _todosController.ControllerContext = _controllerContext;
     }
 
     [Fact]
-    public void GenerateJwtToken_ReturnsValidToken_ForValidUser()
+    public async Task Get_ReturnsAllTodosForUser()
     {
         // Arrange
-        var password = "testPassword";
-
-        _authController.CreatePasswordHash(password, out byte[] passwordHash, out byte[] passwordSalt);
-
-        var user = new TodoApi.Models.User
-        {
-            Id = 1,
-            Username = "testUser",
-            PasswordHash = passwordHash,
-            PasswordSalt = passwordSalt
-        };
-
-        using var hmac = new System.Security.Cryptography.HMACSHA512();
-
-        var key = hmac.Key;
-
-        // Use this key for generating the JWT token
-        _mockConfiguration.SetupGet(c => c["Jwt:Key"]).Returns(Convert.ToBase64String(key));
-
-        // Act
-        var token = _authController.GenerateJwtToken(user);
-
-        // Assert
-        Assert.NotNull(token);
-    }
-
-    [Fact]
-    public async Task Get_ReturnsOkResult_WithListOfTodos()
-    {
-        // Arrange
-
         var todos = new List<TodoModel>
         {
-            new TodoModel { Id = 1, Task = "Test Todo 1", IsCompleted = false },
-            new TodoModel { Id = 2, Task = "Test Todo 2", IsCompleted = true },
-
+            new TodoModel { Id = 1, Task = "Test Todo 1", AssignedTo = 1, IsCompleted = false },
+            new TodoModel { Id = 2, Task = "Test Todo 2", AssignedTo = 1, IsCompleted = false }
         };
-
-        _mockTodoData.Setup(d => d.GetAllAssigned(It.IsAny<int>())).ReturnsAsync(todos);
+        _todoDataMock.Setup(data => data.GetAllAssigned(1)).ReturnsAsync(todos);
 
         // Act
         var result = await _todosController.Get();
 
         // Assert
         var okResult = Assert.IsType<OkObjectResult>(result.Result);
-        var returnValue = Assert.IsType<List<TodoModel>>(okResult.Value);
-        Assert.Equal(todos.Count, returnValue.Count);
+        var returnedTodos = Assert.IsType<List<TodoModel>>(okResult.Value);
+        Assert.Equal(2, returnedTodos.Count);
+        Assert.Equal("Test Todo 1", returnedTodos[0].Task);
+        Assert.Equal("Test Todo 2", returnedTodos[1].Task);
     }
 
     [Fact]
-    public async Task Get_ReturnsOkResult_WithListOfTodos_WhenTokenIsValid()
+    public async Task Post_ShouldReturnCreatedTodo_WhenSuccessful()
     {
         // Arrange
-        var fakeToken = GenerateFakeJwtToken();
-
-        var authHeaderValue = new System.Net.Http.Headers.AuthenticationHeaderValue("Bearer", fakeToken).ToString();
-
-        _todosController.ControllerContext.HttpContext.Request.Headers.Authorization = authHeaderValue;
-
-        var todos = new List<TodoModel>
-        {
-            new TodoModel { Id = 1, Task = "Test Todo 1", IsCompleted = false },
-            new TodoModel { Id = 2, Task = "Test Todo 2", IsCompleted = true },
-
-        };
-
-        _mockTodoData.Setup(d => d.GetAllAssigned(It.IsAny<int>())).ReturnsAsync(todos);
-
-        // Act
-        var result = await _todosController.Get();
-
-        // Assert
-        var okResult = Assert.IsType<OkObjectResult>(result.Result);
-
-        var returnValue = Assert.IsType<List<TodoModel>>(okResult.Value);
-
-        Assert.Equal(todos.Count, returnValue.Count);
-    }
-
-    [Fact]
-    public async Task GetTodoById_ReturnsOkResult_WithTodoModel_WhenTodoExists()
-    {
-        // Arrange
-        var fakeToken = GenerateFakeJwtToken();
-
-        var authHeaderValue = new System.Net.Http.Headers.AuthenticationHeaderValue("Bearer", fakeToken).ToString();
-
-        _todosController.ControllerContext.HttpContext.Request.Headers.Authorization = authHeaderValue;
-
-        var todoId = 1;
-
-        var todo = new TodoModel { Id = todoId, Task = "Test Todo", IsCompleted = false };
-
-        _mockTodoData.Setup(d => d.GetOneAssigned(It.IsAny<int>(), todoId)).ReturnsAsync(todo);
-
-        // Act
-        var result = await _todosController.Get(todoId);
-
-        // Assert
-        var okResult = Assert.IsType<OkObjectResult>(result.Result);
-
-        var returnValue = Assert.IsType<TodoModel>(okResult.Value);
-
-        Assert.Equal(todo.Id, returnValue.Id);
-
-        Assert.Equal(todo.Task, returnValue.Task);
-
-        Assert.Equal(todo.IsCompleted, returnValue.IsCompleted);
-    }
-
-    [Fact]
-    public async Task GetTodoById_ReturnsNotFound_WhenTodoDoesNotExist()
-    {
-        // Arrange
-        var fakeToken = GenerateFakeJwtToken();
-
-        var authHeaderValue = new System.Net.Http.Headers.AuthenticationHeaderValue("Bearer", fakeToken).ToString();
-
-        _todosController.ControllerContext.HttpContext.Request.Headers.Authorization = authHeaderValue;
-
-        var todoId = 1;
-
-        _mockTodoData.Setup(d => d.GetOneAssigned(It.IsAny<int>(), todoId)).ReturnsAsync((TodoModel)null!);
-
-        // Act
-        var result = await _todosController.Get(todoId);
-
-        // Assert
-        Assert.IsType<NotFoundObjectResult>(result.Result);
-    }
-
-    [Fact]
-    public async Task Post_CreatesNewTodo_ReturnsCreatedTodo()
-    {
-        // Arrange
-        var taskDescription = "Test Task";
-
+        var newTask = "New Task";
         var isCompleted = false;
-
-        var newTodo = new TodoModel { Id = 3, Task = taskDescription, IsCompleted = isCompleted };
-
-        _mockTodoData.Setup(d => d.Create(It.IsAny<int>(), taskDescription, isCompleted)).ReturnsAsync(newTodo);
+        var newTodo = new TodoModel { Id = 3, Task = newTask, AssignedTo = 1, IsCompleted = isCompleted };
+        _todoDataMock.Setup(data => data.Create(It.IsAny<int>(), newTask, isCompleted)).ReturnsAsync(newTodo);
 
         // Act
-        var result = await _todosController.Post(taskDescription, isCompleted);
+        var result = await _todosController.Post(newTask, isCompleted);
 
         // Assert
-        var createdAtActionResult = Assert.IsType<OkObjectResult>(result.Result);
-
-        var returnValue = Assert.IsType<TodoModel>(createdAtActionResult.Value);
-
-        Assert.Equal(newTodo.Id, returnValue.Id);
-
-        Assert.Equal(newTodo.Task, returnValue.Task);
-        Assert.Equal(newTodo.IsCompleted, returnValue.IsCompleted);
+        var okResult = Assert.IsType<OkObjectResult>(result.Result);
+        var returnedTodo = Assert.IsType<TodoModel>(okResult.Value);
+        Assert.Equal(newTask, returnedTodo.Task);
+        Assert.Equal(isCompleted, returnedTodo.IsCompleted);
     }
 
     [Fact]
-    public async Task Put_NoUpdate_ReturnsNotFound()
+    public async Task Post_ShouldReturnBadRequest_WhenExceptionOccurs()
     {
         // Arrange
-        var todoId = 5;
-
-        var updatedTask = "Updated Test Task";
-
-        var affectedRows = 0;
-
-        _mockTodoData.Setup(d => d.UpdateTask(It.IsAny<int>(), todoId, updatedTask)).ReturnsAsync(affectedRows);
+        var newTask = "New Task";
+        var isCompleted = false;
+        _todoDataMock.Setup(data => data.Create(It.IsAny<int>(), newTask, isCompleted)).ThrowsAsync(new Exception());
 
         // Act
-        var result = await _todosController.Put(todoId, updatedTask);
+        var result = await _todosController.Post(newTask, isCompleted);
 
         // Assert
-        var notFoundResult = Assert.IsType<NotFoundObjectResult>(result);
-
-        var returnValue = Assert.IsAssignableFrom<object>(notFoundResult.Value);
-
-        // Use reflection to check the properties of the anonymous type
-        var type = returnValue.GetType();
-
-        var messageProperty = type.GetProperty("message");
-
-        Assert.NotNull(messageProperty); // This will fail if 'message' property does not exist
-
-        if (messageProperty != null)
-        {
-            Assert.Equal("Task not found or no changes made.", messageProperty.GetValue(returnValue));
-        }
+        Assert.IsType<BadRequestResult>(result.Result);
     }
 
     [Fact]
-    public async Task Put_UpdatesTodo_ReturnsSuccessMessage()
+    public async Task Put_ShouldReturnOk_WhenTaskIsUpdated()
     {
         // Arrange
-        var fakeToken = GenerateFakeJwtToken();
-
-        var authHeaderValue = new System.Net.Http.Headers.AuthenticationHeaderValue("Bearer", fakeToken).ToString();
-
-        _todosController.ControllerContext.HttpContext.Request.Headers.Authorization = authHeaderValue;
-
-        var todoId = 5;
-
-        var updatedTask = "Updated Test Task";
-
-        var affectedRows = 1;
-
-        _mockTodoData.Setup(d => d.UpdateTask(It.IsAny<int>(), todoId, updatedTask)).ReturnsAsync(affectedRows);
+        var todoId = 1;
+        var updatedTask = "Updated Task";
+        _todoDataMock.Setup(data => data.UpdateTask(It.IsAny<int>(), todoId, updatedTask)).ReturnsAsync(1);
 
         // Act
         var result = await _todosController.Put(todoId, updatedTask);
 
         // Assert
         var okResult = Assert.IsType<OkObjectResult>(result);
-
         var returnValue = Assert.IsAssignableFrom<object>(okResult.Value);
 
         // Use reflection to check the properties of the anonymous type
         var type = returnValue.GetType();
-
         var messageProperty = type.GetProperty("message");
+        Assert.NotNull(messageProperty); // Check that the 'message' property exists
+        var messageValue = messageProperty.GetValue(returnValue);
+        Assert.NotNull(messageValue); // Check that the 'message' property has a value
+        Assert.Equal("Task updated successfully.", messageValue);
 
         var affectedRowsProperty = type.GetProperty("affectedRows");
-
-        Assert.NotNull(messageProperty);
-
-        Assert.NotNull(affectedRowsProperty);
-
-        Assert.Equal("Task updated successfully.", messageProperty.GetValue(returnValue));
-
-        Assert.Equal(affectedRows, affectedRowsProperty.GetValue(returnValue));
-
+        Assert.NotNull(affectedRowsProperty); // Check that the 'affectedRows' property exists
+        var affectedRowsValue = affectedRowsProperty.GetValue(returnValue);
+        Assert.NotNull(affectedRowsValue); // Check that the 'affectedRows' property has a value
+        Assert.Equal(1, affectedRowsValue);
     }
 
+
     [Fact]
-    public async Task Delete_NoTodoFound_ReturnsNotFound()
+    public async Task Put_ShouldReturnNotFound_WhenNoTaskIsUpdated()
     {
         // Arrange
-        var fakeToken = GenerateFakeJwtToken();
-
-        var authHeaderValue = new System.Net.Http.Headers.AuthenticationHeaderValue("Bearer", fakeToken).ToString();
-
-        _todosController.ControllerContext.HttpContext.Request.Headers.Authorization = authHeaderValue;
-
-        var todoId = 5;
-
-        var rowsAffected = 0;
-
-        _mockTodoData.Setup(d => d.Delete(It.IsAny<int>(), todoId)).ReturnsAsync(rowsAffected);
+        var todoId = 1;
+        var updatedTask = "Updated Task";
+        _todoDataMock.Setup(data => data.UpdateTask(It.IsAny<int>(), todoId, updatedTask)).ReturnsAsync(0);
 
         // Act
-        var result = await _todosController.Delete(todoId);
+        var result = await _todosController.Put(todoId, updatedTask);
 
         // Assert
         var notFoundResult = Assert.IsType<NotFoundObjectResult>(result);
-
         var returnValue = Assert.IsAssignableFrom<object>(notFoundResult.Value);
 
         // Use reflection to check the properties of the anonymous type
         var type = returnValue.GetType();
-
         var messageProperty = type.GetProperty("message");
-
-        Assert.NotNull(messageProperty);
-
-        Assert.Equal("Todo not found.", messageProperty.GetValue(returnValue));
-
+        Assert.NotNull(messageProperty); // Check that the 'message' property exists
+        var messageValue = messageProperty.GetValue(returnValue);
+        Assert.NotNull(messageValue); // Check that the 'message' property has a value
+        Assert.Equal("Task not found or no changes made.", messageValue);
     }
 
 
+
     [Fact]
-    public async Task Complete_MarksTodoAsComplete_ReturnsSuccessMessage()
+    public async Task Complete_ShouldReturnOk_WhenTodoIsMarkedAsComplete()
     {
         // Arrange
-        var fakeToken = GenerateFakeJwtToken();
-
-        var authHeaderValue = new System.Net.Http.Headers.AuthenticationHeaderValue("Bearer", fakeToken).ToString();
-
-        _todosController.ControllerContext.HttpContext.Request.Headers.Authorization = authHeaderValue;
-
-        var todoId = 5;
-
-        var rowsAffected = 1;
-
-        _mockTodoData.Setup(d => d.CompleteTodo(It.IsAny<int>(), todoId)).ReturnsAsync(rowsAffected);
+        var todoId = 1;
+        _todoDataMock.Setup(data => data.CompleteTodo(It.IsAny<int>(), todoId)).ReturnsAsync(1);
 
         // Act
         var result = await _todosController.Complete(todoId);
@@ -361,110 +178,254 @@ public class TodosControllerTests
         Assert.Equal("Todo marked as complete successfully.", messageProperty.GetValue(returnValue));
     }
 
+
     [Fact]
-    public async Task Complete_NoTodoFound_ReturnsNotFound()
+    public async Task Complete_ShouldReturnNotFound_WhenTodoIsNotUpdated()
     {
         // Arrange
-        var fakeToken = GenerateFakeJwtToken();
-
-        var authHeaderValue = new System.Net.Http.Headers.AuthenticationHeaderValue("Bearer", fakeToken).ToString();
-
-        _todosController.ControllerContext.HttpContext.Request.Headers.Authorization = authHeaderValue;
-
-        var todoId = 5;
-
-        var rowsAffected = 0; // Pretpostavimo da nijedan red nije ažuriran
-
-        _mockTodoData.Setup(d => d.CompleteTodo(It.IsAny<int>(), todoId)).ReturnsAsync(rowsAffected);
+        var todoId = 1;
+        _todoDataMock.Setup(data => data.CompleteTodo(It.IsAny<int>(), todoId)).ReturnsAsync(0);
 
         // Act
         var result = await _todosController.Complete(todoId);
 
         // Assert
         var notFoundResult = Assert.IsType<NotFoundObjectResult>(result);
-
         var returnValue = Assert.IsAssignableFrom<object>(notFoundResult.Value);
 
         // Use reflection to check the properties of the anonymous type
         var type = returnValue.GetType();
-
         var messageProperty = type.GetProperty("message");
-
-        Assert.NotNull(messageProperty);
-
-        Assert.Equal("Todo not found or already completed.", messageProperty.GetValue(returnValue));
+        Assert.NotNull(messageProperty); // Check that the 'message' property exists
+        var messageValue = messageProperty.GetValue(returnValue);
+        Assert.NotNull(messageValue); // Check that the 'message' property has a value
+        Assert.Equal("Todo not found or already completed.", messageValue);
     }
 
     [Fact]
-    public async Task Delete_RemovesTodo_ReturnsSuccessMessage()
+    public async Task Delete_ShouldReturnOk_WhenTodoIsDeleted()
     {
         // Arrange
-        var fakeToken = GenerateFakeJwtToken();
-
-        var authHeaderValue = new System.Net.Http.Headers.AuthenticationHeaderValue("Bearer", fakeToken).ToString();
-
-        _todosController.ControllerContext.HttpContext.Request.Headers.Authorization = authHeaderValue;
-
-        var todoId = 5;
-
-        var rowsAffected = 1;
-
-        _mockTodoData.Setup(d => d.Delete(It.IsAny<int>(), todoId)).ReturnsAsync(rowsAffected);
+        var todoId = 1;
+        _todoDataMock.Setup(data => data.Delete(It.IsAny<int>(), todoId)).ReturnsAsync(1);
 
         // Act
         var result = await _todosController.Delete(todoId);
 
         // Assert
         var okResult = Assert.IsType<OkObjectResult>(result);
-
         var returnValue = Assert.IsAssignableFrom<object>(okResult.Value);
 
         // Use reflection to check the properties of the anonymous type
         var type = returnValue.GetType();
-
         var messageProperty = type.GetProperty("message");
-
         Assert.NotNull(messageProperty); // Check that the 'message' property exists
-
         var messageValue = messageProperty.GetValue(returnValue);
-
         Assert.NotNull(messageValue); // Check that the 'message' property has a value
+        Assert.Equal("Todo deleted successfully.", messageValue);
 
-        Assert.Equal("Todo deleted successfully.", messageValue.ToString()); // Check that the value is what you expect
-
+        var rowsAffectedProperty = type.GetProperty("rowsAffected");
+        Assert.NotNull(rowsAffectedProperty); // Check that the 'rowsAffected' property exists
+        var rowsAffectedValue = rowsAffectedProperty.GetValue(returnValue);
+        Assert.NotNull(rowsAffectedValue); // Check that the 'rowsAffected' property has a value
+        Assert.Equal(1, rowsAffectedValue);
     }
 
-    private string GenerateFakeJwtToken()
+    [Fact]
+    public async Task Delete_ShouldReturnNotFound_WhenTodoIsNotDeleted()
     {
-        var password = "testPassword";
+        // Arrange
+        var todoId = 1;
+        _todoDataMock.Setup(data => data.Delete(It.IsAny<int>(), todoId)).ReturnsAsync(0);
 
-        _authController.CreatePasswordHash(password, out byte[] passwordHash, out byte[] passwordSalt);
+        // Act
+        var result = await _todosController.Delete(todoId);
 
-        var user = new TodoApi.Models.User
-        {
-            Id = 1,
-            Username = "testUser",
-            PasswordHash = passwordHash,
-            PasswordSalt = passwordSalt
-        };
+        // Assert
+        var notFoundResult = Assert.IsType<NotFoundObjectResult>(result);
+        var returnValue = Assert.IsAssignableFrom<object>(notFoundResult.Value);
 
-        // Use an empty constructor to generate a key of length 512 bits
-        using var hmac = new System.Security.Cryptography.HMACSHA512();
-
-        var key = hmac.Key;
-
-        // Use this key for generating the JWT token
-        _mockConfiguration.SetupGet(c => c["Jwt:Key"]).Returns(Convert.ToBase64String(key));
-
-        return _authController.GenerateJwtToken(user);
+        // Use reflection to check the properties of the anonymous type
+        var type = returnValue.GetType();
+        var messageProperty = type.GetProperty("message");
+        Assert.NotNull(messageProperty); // Check that the 'message' property exists
+        var messageValue = messageProperty.GetValue(returnValue);
+        Assert.NotNull(messageValue); // Check that the 'message' property has a value
+        Assert.Equal("Todo not found.", messageValue);
     }
-    private void CreatePasswordHash(string password, out byte[] passwordHash, out byte[] passwordSalt)
+
+    [Fact]
+    public async Task Delete_ShouldReturnBadRequest_WhenExceptionOccurs()
     {
-        using var hmac = new System.Security.Cryptography.HMACSHA512();
+        // Arrange
+        var todoId = 1;
+        _todoDataMock.Setup(data => data.Delete(It.IsAny<int>(), todoId)).ThrowsAsync(new Exception());
 
-        passwordSalt = hmac.Key;
+        // Act
+        var result = await _todosController.Delete(todoId);
 
-        passwordHash = hmac.ComputeHash(System.Text.Encoding.UTF8.GetBytes(password));
+        // Assert
+        Assert.IsType<BadRequestObjectResult>(result);
     }
+
+    [Fact]
+    public async Task Get_ShouldReturnBadRequest_WhenExceptionOccurs()
+    {
+        // Arrange
+        _todoDataMock.Setup(data => data.GetAllAssigned(It.IsAny<int>())).ThrowsAsync(new Exception());
+
+        // Act
+        var result = await _todosController.Get();
+
+        // Assert
+        var actionResult = Assert.IsType<ActionResult<List<TodoModel>>>(result);
+        Assert.IsType<BadRequestResult>(actionResult.Result);
+    }
+
+    [Fact]
+    public async Task Get_ShouldReturnNotFound_WhenTodoIsNull()
+    {
+        // Arrange
+        var todoId = 1;
+        _todoDataMock.Setup(data => data.GetOneAssigned(It.IsAny<int>(), todoId)).ReturnsAsync((TodoModel)null!);
+
+        // Act
+        var result = await _todosController.Get(todoId);
+
+        // Assert
+        var actionResult = Assert.IsType<ActionResult<TodoModel>>(result);
+        Assert.IsType<NotFoundObjectResult>(actionResult.Result);
+    }
+
+    [Fact]
+    public async Task Delete_RemovesTodo_ReturnsSuccessMessage()
+    {
+        // Arrange
+        var todoId = 1;
+        _todoDataMock.Setup(data => data.Delete(It.IsAny<int>(), todoId)).ReturnsAsync(1);
+
+        // Act
+        var result = await _todosController.Delete(todoId);
+
+        // Assert
+        var okResult = Assert.IsType<OkObjectResult>(result);
+        var returnValue = Assert.IsAssignableFrom<object>(okResult.Value);
+
+        // Use reflection to check the properties of the anonymous type
+        var type = returnValue.GetType();
+        var messageProperty = type.GetProperty("message");
+        Assert.NotNull(messageProperty); // Check that the 'message' property exists
+        var messageValue = messageProperty.GetValue(returnValue);
+        Assert.NotNull(messageValue); // Check that the 'message' property has a value
+        Assert.Equal("Todo deleted successfully.", messageValue);
+    }
+
+    [Fact]
+    public async Task Delete_ReturnsNotFound_WhenTodoIsNull()
+    {
+        // Arrange
+        var todoId = 1;
+        _todoDataMock.Setup(data => data.Delete(It.IsAny<int>(), todoId)).ReturnsAsync(0);
+
+        // Act
+        var result = await _todosController.Delete(todoId);
+
+        // Assert
+        var notFoundResult = Assert.IsType<NotFoundObjectResult>(result);
+        var returnValue = Assert.IsAssignableFrom<object>(notFoundResult.Value);
+
+        // Use reflection to check the properties of the anonymous type
+        var type = returnValue.GetType();
+        var messageProperty = type.GetProperty("message");
+        Assert.NotNull(messageProperty); // Check that the 'message' property exists
+        var messageValue = messageProperty.GetValue(returnValue);
+        Assert.NotNull(messageValue); // Check that the 'message' property has a value
+        Assert.Equal("Todo not found.", messageValue);
+    }
+
+    [Fact]
+    public async Task Delete_ReturnsBadRequest_WhenExceptionOccurs()
+    {
+        // Arrange
+        var todoId = 1;
+        _todoDataMock.Setup(data => data.Delete(It.IsAny<int>(), todoId)).ThrowsAsync(new Exception());
+
+        // Act
+        var result = await _todosController.Delete(todoId);
+
+        // Assert
+        Assert.IsType<BadRequestObjectResult>(result);
+    }
+
+    [Fact]
+    public async Task Put_UpdatesTodo_ReturnsSuccessMessage()
+    {
+        // Arrange
+        var todoId = 1;
+        var updatedTask = "Updated Task";
+        _todoDataMock.Setup(data => data.UpdateTask(It.IsAny<int>(), todoId, updatedTask)).ReturnsAsync(1);
+
+        // Act
+        var result = await _todosController.Put(todoId, updatedTask);
+
+        // Assert
+        var okResult = Assert.IsType<OkObjectResult>(result);
+        var returnValue = Assert.IsAssignableFrom<object>(okResult.Value);
+
+        // Use reflection to check the properties of the anonymous type
+        var type = returnValue.GetType();
+        var messageProperty = type.GetProperty("message");
+        Assert.NotNull(messageProperty); // Check that the 'message' property exists
+        var messageValue = messageProperty.GetValue(returnValue);
+        Assert.NotNull(messageValue); // Check that the 'message' property has a value
+        Assert.Equal("Task updated successfully.", messageValue);
+    }
+
+    [Fact]
+    public async Task Put_ReturnsNotFound_WhenNoTaskIsUpdated()
+    {
+        // Arrange
+        var todoId = 1;
+        var updatedTask = "Updated Task";
+        _todoDataMock.Setup(data => data.UpdateTask(It.IsAny<int>(), todoId, updatedTask)).ReturnsAsync(0);
+
+        // Act
+        var result = await _todosController.Put(todoId, updatedTask);
+
+        // Assert
+        var notFoundResult = Assert.IsType<NotFoundObjectResult>(result);
+        var returnValue = Assert.IsAssignableFrom<object>(notFoundResult.Value);
+
+        // Use reflection to check the properties of the anonymous type
+        var type = returnValue.GetType();
+        var messageProperty = type.GetProperty("message");
+        Assert.NotNull(messageProperty); // Check that the 'message' property exists
+        var messageValue = messageProperty.GetValue(returnValue);
+        Assert.NotNull(messageValue); // Check that the 'message' property has a value
+        Assert.Equal("Task not found or no changes made.", messageValue);
+    }
+
+    [Fact]
+    public async Task Put_ReturnsBadRequest_WhenExceptionOccurs()
+    {
+        // Arrange
+        var todoId = 1;
+        var updatedTask = "Updated Task";
+        _todoDataMock.Setup(data => data.UpdateTask(It.IsAny<int>(), todoId, updatedTask)).ThrowsAsync(new Exception());
+
+        // Act
+        var result = await _todosController.Put(todoId, updatedTask);
+
+        // Assert
+        Assert.IsType<BadRequestObjectResult>(result);
+    }
+
+ 
+
+
+
+
+
+
 
 }
