@@ -93,6 +93,11 @@ public class AuthController : ControllerBase
         return Ok();
     }
 
+    /// <summary>
+    /// Generates a JWT token for the specified user.
+    /// </summary>
+    /// <param name="user">The user.</param>
+    /// <returns>The generated JWT token.</returns>
     private string GenerateJwtToken(User user)
     {
         var tokenHandler = new JwtSecurityTokenHandler();
@@ -114,6 +119,12 @@ public class AuthController : ControllerBase
         return tokenHandler.WriteToken(token);
     }
 
+    /// <summary>
+    /// Creates a password hash and salt for the specified password.
+    /// </summary>
+    /// <param name="password">The password.</param>
+    /// <param name="passwordHash">The generated password hash.</param>
+    /// <param name="passwordSalt">The generated password salt.</param>
     private void CreatePasswordHash(string password, out byte[] passwordHash, out byte[] passwordSalt)
     {
         using var hmac = new System.Security.Cryptography.HMACSHA512();
@@ -121,6 +132,13 @@ public class AuthController : ControllerBase
         passwordHash = hmac.ComputeHash(System.Text.Encoding.UTF8.GetBytes(password));
     }
 
+    /// <summary>
+    /// Verifies the password hash for the specified password.
+    /// </summary>
+    /// <param name="password">The password.</param>
+    /// <param name="passwordHash">The password hash to verify against.</param>
+    /// <param name="passwordSalt">The password salt.</param>
+    /// <returns><c>true</c> if the password hash is valid; otherwise, <c>false</c>.</returns>
     private bool VerifyPasswordHash(string password, byte[] passwordHash, byte[] passwordSalt)
     {
         using var hmac = new System.Security.Cryptography.HMACSHA512(passwordSalt);
