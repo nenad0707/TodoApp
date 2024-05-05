@@ -17,13 +17,33 @@ public class TodoData : ITodoData
     }
 
     /// <summary>
-    /// Retrieves a list of all assigned todo items for a specific user.
+    /// Retrieves a paginated list of all todo items assigned to a specific user.
     /// </summary>
     /// <param name="assignedTo">The ID of the user to whom the todo items are assigned.</param>
-    /// <returns>A task that represents the asynchronous operation. The task result contains a list of TodoModel objects.</returns>
-    public Task<List<TodoModel>> GetAllAssigned(int assignedTo)
+    /// <param name="pageNumber">The page number of the results to fetch.</param>
+    /// <param name="pageSize">The number of todo items to return per page.</param>
+    /// <returns>A task that represents the asynchronous operation. The task result contains a list of <see cref="TodoModel"/> objects representing the assigned todo items. If no items are found, the list will be empty.</returns>
+    public Task<List<TodoModel>> GetAllAssigned(int assignedTo, int pageNumber, int pageSize)
     {
-        return _sql.LoadData<TodoModel, dynamic>("dbo.spTodos_GetAllAssigned", new { AssignedTo = assignedTo }, "Default");
+        return _sql.LoadData<TodoModel, dynamic>(
+            "dbo.spTodos_GetAllAssigned",
+            new { AssignedTo = assignedTo, PageNumber = pageNumber, PageSize = pageSize },
+            "Default");
+    }
+
+    /// <summary>
+    /// Retrieves the total count of todo items assigned to a specific user.
+    /// </summary>
+    /// <param name="assignedTo">The ID of the user to whom the todo items are assigned.</param>
+    /// <returns>A task that represents the asynchronous operation. The task result contains the total number of todo items assigned to the specified user. If no items are found, returns 0.</returns>
+    public async Task<int> GetTotalCount(int assignedTo)
+    {
+        var result = await _sql.LoadData<int, dynamic>(
+            "dbo.spTodos_GetTotalCount",
+            new { AssignedTo = assignedTo },
+            "Default");
+
+        return result.FirstOrDefault();
     }
 
     /// <summary>

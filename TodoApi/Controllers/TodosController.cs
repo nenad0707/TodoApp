@@ -41,15 +41,18 @@ public class TodosController : ControllerBase
     /// <returns>List of Todo items.</returns>
     [HttpGet]
     [ResponseCache(Duration = 15, Location = ResponseCacheLocation.Any)]
-    public async Task<ActionResult<List<TodoModel>>> Get()
+    public async Task<ActionResult<List<TodoModel>>> Get([FromQuery] int pageNumber = 1, [FromQuery] int pageSize = 10)
     {
         _logger.LogInformation("GET api/Todos called.");
 
         try
         {
-            var output = await _data.GetAllAssigned(GetUserId());
+            int userId = GetUserId();
+            var todos = await _data.GetAllAssigned(userId, pageNumber, pageSize);
+            var totalCount = await _data.GetTotalCount(userId);
+            var totalPages = (int)Math.Ceiling(totalCount / (double)pageSize);
 
-            return Ok(output);
+            return Ok(new { Todos = todos, TotalPages = totalPages });
         }
         catch (Exception ex)
         {

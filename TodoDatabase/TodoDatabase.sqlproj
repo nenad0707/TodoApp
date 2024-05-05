@@ -73,6 +73,7 @@
     <Build Include="dbo\Stored Procedures\DeleteUser.sql" />
     <Build Include="dbo\Stored Procedures\GetUserByUsername.sql" />
     <Build Include="dbo\Stored Procedures\GetUserById.sql" />
+    <Build Include="dbo\Stored Procedures\spTodos_GetTotalCount.sql" />
   </ItemGroup>
   <ItemGroup>
     <None Include="TodoDatabase.publish.xml" />
