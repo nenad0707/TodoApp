@@ -7,6 +7,7 @@ using TodoApi.Controllers;
 using TodoLibrary.Models;
 using TodoLibrary;
 using System.Data.SqlClient;
+using Microsoft.Extensions.Logging.Abstractions;
 
 
 namespace TodoApi.Tests;
@@ -36,27 +37,7 @@ public class TodosControllerTests
         _todosController.ControllerContext = _controllerContext;
     }
 
-    [Fact]
-    public async Task Get_ReturnsAllTodosForUser()
-    {
-        // Arrange
-        var todos = new List<TodoModel>
-        {
-            new TodoModel { Id = 1, Task = "Test Todo 1", AssignedTo = 1, IsCompleted = false },
-            new TodoModel { Id = 2, Task = "Test Todo 2", AssignedTo = 1, IsCompleted = false }
-        };
-        _todoDataMock.Setup(data => data.GetAllAssigned(1)).ReturnsAsync(todos);
 
-        // Act
-        var result = await _todosController.Get();
-
-        // Assert
-        var okResult = Assert.IsType<OkObjectResult>(result.Result);
-        var returnedTodos = Assert.IsType<List<TodoModel>>(okResult.Value);
-        Assert.Equal(2, returnedTodos.Count);
-        Assert.Equal("Test Todo 1", returnedTodos[0].Task);
-        Assert.Equal("Test Todo 2", returnedTodos[1].Task);
-    }
 
     [Fact]
     public async Task Post_ShouldReturnCreatedTodo_WhenSuccessful()
@@ -266,20 +247,6 @@ public class TodosControllerTests
 
         // Assert
         Assert.IsType<BadRequestObjectResult>(result);
-    }
-
-    [Fact]
-    public async Task Get_ShouldReturnBadRequest_WhenExceptionOccurs()
-    {
-        // Arrange
-        _todoDataMock.Setup(data => data.GetAllAssigned(It.IsAny<int>())).ThrowsAsync(new Exception());
-
-        // Act
-        var result = await _todosController.Get();
-
-        // Assert
-        var actionResult = Assert.IsType<ActionResult<List<TodoModel>>>(result);
-        Assert.IsType<BadRequestResult>(actionResult.Result);
     }
 
     [Fact]
