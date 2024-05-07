@@ -1,6 +1,8 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using System.Data.SqlClient;
+using System.Net;
 using System.Security.Claims;
+using System.Text;
 using TodoLibrary;
 using TodoLibrary.Models;
 
@@ -40,11 +42,9 @@ public class TodosController : ControllerBase
     /// </summary>
     /// <returns>List of Todo items.</returns>
     [HttpGet]
-    [ResponseCache(Duration = 15, Location = ResponseCacheLocation.Any)]
-    public async Task<ActionResult<List<TodoModel>>> Get([FromQuery] int pageNumber = 1, [FromQuery] int pageSize = 10)
+    [ResponseCache(Duration = 30, Location = ResponseCacheLocation.Any, VaryByQueryKeys = new[] { "pageNumber", "pageSize" })]
+    public async Task<IActionResult> Get([FromQuery] int pageNumber = 1, [FromQuery] int pageSize = 10)
     {
-        _logger.LogInformation("GET api/Todos called.");
-
         try
         {
             int userId = GetUserId();
@@ -52,14 +52,25 @@ public class TodosController : ControllerBase
             var totalCount = await _data.GetTotalCount(userId);
             var totalPages = (int)Math.Ceiling(totalCount / (double)pageSize);
 
+            var etag = GenerateETag(todos); 
+
+            var providedETag = Request.Headers["If-None-Match"].FirstOrDefault();
+            if (!string.IsNullOrWhiteSpace(providedETag) && providedETag.Equals(etag, StringComparison.Ordinal))
+            {
+                return StatusCode(304);
+            }
+
+            Response.Headers["ETag"] = new Microsoft.Extensions.Primitives.StringValues(etag);
             return Ok(new { Todos = todos, TotalPages = totalPages });
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex, "The GET call to api/Todos failed.");
-            return BadRequest();
+            _logger.LogError(ex, "Failed to retrieve todos.");
+            return BadRequest("An error occurred while retrieving todos.");
         }
     }
+
+
 
     // GET api/Todos/5
     /// <summary>
@@ -222,6 +233,13 @@ public class TodosController : ControllerBase
             _logger.LogError(ex, "The DELETE call to api/Todos/{TodoId} failed.", todoId);
             return BadRequest(new { message = "An error occurred while deleting the todo." });
         }
+    }
+
+    private string GenerateETag(IEnumerable<TodoModel> todos)
+    {
+        var etagContent = string.Join("-", todos.Select(t => t.Id + t.IsCompleted.ToString()));
+        var etagHash = Convert.ToBase64String(System.Security.Cryptography.SHA256.Create().ComputeHash(Encoding.UTF8.GetBytes(etagContent)));
+        return $"\"{etagHash}\"";
     }
 
 }
