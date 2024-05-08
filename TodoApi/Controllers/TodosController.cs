@@ -42,7 +42,7 @@ public class TodosController : ControllerBase
     /// </summary>
     /// <returns>List of Todo items.</returns>
     [HttpGet]
-    [ResponseCache(Duration = 30, Location = ResponseCacheLocation.Any, VaryByQueryKeys = new[] { "pageNumber", "pageSize" })]
+    [ResponseCache(Duration = 15, Location = ResponseCacheLocation.Any, VaryByQueryKeys = new[] { "pageNumber", "pageSize" })]
     public async Task<IActionResult> Get([FromQuery] int pageNumber = 1, [FromQuery] int pageSize = 10)
     {
         try
@@ -79,7 +79,6 @@ public class TodosController : ControllerBase
     /// <param name="todoId">The ID of the Todo item.</param>
     /// <returns>The Todo item.</returns>
     [HttpGet("{todoId}")]
-    [ResponseCache(Duration = 15, Location = ResponseCacheLocation.Any)]
     public async Task<ActionResult<TodoModel>> Get(int todoId)
     {
         _logger.LogInformation("GET api/Todos/{TodoId} called.", todoId);
