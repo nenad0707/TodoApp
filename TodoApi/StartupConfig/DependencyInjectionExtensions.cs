@@ -128,8 +128,8 @@ public static class DependencyInjectionExtensions
     {
         builder.Host.UseSerilog((hostingContext, loggerConfiguration) => loggerConfiguration
                    .ReadFrom.Configuration(hostingContext.Configuration)
-                              .Enrich.FromLogContext()
-                                         .WriteTo.Console());
+                   .Enrich.FromLogContext()
+                   .WriteTo.Console());
     }
 
     /// <summary>

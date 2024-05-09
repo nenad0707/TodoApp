@@ -42,7 +42,7 @@ public class TodosController : ControllerBase
     /// </summary>
     /// <returns>List of Todo items.</returns>
     [HttpGet]
-    [ResponseCache(Duration = 15, Location = ResponseCacheLocation.Any, VaryByQueryKeys = new[] { "pageNumber", "pageSize" })]
+    [ResponseCache(Duration = 10, Location = ResponseCacheLocation.Any, VaryByQueryKeys = new[] { "pageNumber", "pageSize" })]
     public async Task<IActionResult> Get([FromQuery] int pageNumber = 1, [FromQuery] int pageSize = 10)
     {
         try
@@ -52,15 +52,21 @@ public class TodosController : ControllerBase
             var totalCount = await _data.GetTotalCount(userId);
             var totalPages = (int)Math.Ceiling(totalCount / (double)pageSize);
 
-            var etag = GenerateETag(todos); 
+            var etag = GenerateETag(todos);
+            _logger.LogInformation($"Generated ETag: {etag}");
+            _logger.LogInformation("Checking client ETag: {ClientETag}", Request.Headers.IfNoneMatch!);
 
-            var providedETag = Request.Headers["If-None-Match"].FirstOrDefault();
+
+            var providedETag = Request.Headers.IfNoneMatch.FirstOrDefault();
+            _logger.LogInformation($"Provided ETag: {providedETag}");
+
             if (!string.IsNullOrWhiteSpace(providedETag) && providedETag.Equals(etag, StringComparison.Ordinal))
             {
+                _logger.LogInformation("ETag matches. Returning 304 Not Modified.");
                 return StatusCode(304);
             }
 
-            Response.Headers["ETag"] = new Microsoft.Extensions.Primitives.StringValues(etag);
+            Response.Headers.ETag = new Microsoft.Extensions.Primitives.StringValues(etag);
             return Ok(new { Todos = todos, TotalPages = totalPages });
         }
         catch (Exception ex)
