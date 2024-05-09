@@ -54,7 +54,7 @@ public class TodosController : ControllerBase
 
             var etag = GenerateETag(todos);
             _logger.LogInformation($"Generated ETag: {etag}");
-            _logger.LogInformation("Checking client ETag: {ClientETag}", Request.Headers.IfNoneMatch!);
+            _logger.LogInformation("Checking client ETag: {ClientETag}", Request.Headers.IfNoneMatch.ToString().Replace("\"", ""));
 
 
             var providedETag = Request.Headers.IfNoneMatch.FirstOrDefault();
