@@ -36,11 +36,12 @@ public class TodosController : ControllerBase
         return int.Parse(userIdText!);
     }
 
-    // GET: api/Todos
     /// <summary>
-    /// Get all Todo items for the current user.
+    /// Retrieves a paginated list of Todo items assigned to the current user.
     /// </summary>
-    /// <returns>List of Todo items.</returns>
+    /// <param name="pageNumber">The page number to retrieve. Default is 1.</param>
+    /// <param name="pageSize">The number of items per page. Default is 5.</param>
+    /// <returns>An IActionResult containing the paginated list of Todo items and the total number of pages.</returns>
     [HttpGet]
     [ResponseCache(Duration = 10, Location = ResponseCacheLocation.Any, VaryByQueryKeys = new[] { "pageNumber", "pageSize" })]
     public async Task<IActionResult> Get([FromQuery] int pageNumber = 1, [FromQuery] int pageSize = 10)
