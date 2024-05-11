@@ -44,7 +44,7 @@ public class TodosController : ControllerBase
     /// <returns>An IActionResult containing the paginated list of Todo items and the total number of pages.</returns>
     [HttpGet]
     [ResponseCache(Duration = 10, Location = ResponseCacheLocation.Any, VaryByQueryKeys = new[] { "pageNumber", "pageSize" })]
-    public async Task<IActionResult> Get([FromQuery] int pageNumber = 1, [FromQuery] int pageSize = 10)
+    public async Task<IActionResult> Get([FromQuery] int pageNumber = 1, [FromQuery] int pageSize = 5)
     {
         try
         {
