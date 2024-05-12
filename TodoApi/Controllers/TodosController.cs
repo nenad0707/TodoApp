@@ -48,6 +48,9 @@ public class TodosController : ControllerBase
     {
         try
         {
+            if (pageNumber < 1) pageNumber = 1;
+            if (pageSize <= 0) pageSize = 5;
+                
             int userId = GetUserId();
             var todos = await _data.GetAllAssigned(userId, pageNumber, pageSize);
             var totalCount = await _data.GetTotalCount(userId);

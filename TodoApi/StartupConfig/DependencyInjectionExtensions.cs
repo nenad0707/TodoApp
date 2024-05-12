@@ -164,10 +164,11 @@ public static class DependencyInjectionExtensions
             options.AddPolicy("AllowAllOrigins",
                 builder =>
                 {
-                    builder.AllowAnyOrigin() // i can also use .WithOrigins("http://localhost:3000") or any other origin from azure when deployed my client app
-                           .AllowAnyMethod()
-                           .AllowAnyHeader();
-                });
+                builder.AllowAnyOrigin() // i can also use .WithOrigins("http://localhost:3000") or any other origin from azure when deployed my client app
+                       .AllowAnyMethod()
+                       .AllowAnyHeader()
+                       .WithExposedHeaders("ETag");
+        });
         });
     }
 }
