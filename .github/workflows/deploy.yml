@@ -116,6 +116,7 @@ jobs:
       - uses: actions/download-artifact@v3
         with:
           name: website
+          path: website/publish.zip
       - uses: azure/login@v1
         name: Sign in to Azure
         with:
@@ -139,6 +140,7 @@ jobs:
       - uses: actions/download-artifact@v3
         with:
           name: database
+          path: database/TodoDatabase.dacpac
       - uses: azure/login@v1
         name: Sign in to Azure
         with:
