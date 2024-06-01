@@ -1,4 +1,7 @@
-@description('The location into which your Azure resources should be deployed.')
+@description('The name of the App Service Plan.')
+param appServicePlanName string = 'api-website-plan-${environmentType}'
+
+@description('The location of the App Service Plan.')
 param location string = resourceGroup().location
 
 @description('Select the type of environment you want to provision. Allowed values are Production and Test.')
@@ -7,6 +10,19 @@ param location string = resourceGroup().location
   'Test'
 ])
 param environmentType string
+
+@description('The settings of the App Service.')
+param appSettings array = []
+
+@secure()
+@description('JWT Key for the App Service.')
+param jwtKey string
+
+@description('The existing SQL Server name.')
+param existingSqlServerName string
+
+@description('The existing SQL Database name.')
+param existingDatabaseName string
 
 @description('A unique suffix to add to resource names that need to be globally unique.')
 @maxLength(13)
@@ -19,140 +35,40 @@ param sqlServerAdministratorLogin string
 @description('The administrator login password for the SQL server.')
 param sqlServerAdministratorLoginPassword string
 
-@secure()
-@description('JWT Key for the App Service.')
-param jwtKey string
-
-// Define the names for resources.
-var appServiceAppName = 'api-website-${resourceNameSuffix}'
-var appServicePlanName = 'api-website'
-var logAnalyticsWorkspaceName = 'workspace-${resourceNameSuffix}'
-var applicationInsightsName = 'apiwebsite'
-var sqlServerName = 'sql-website-${resourceNameSuffix}'
-var sqlDatabaseName = 'TodoDb'
-
-// Define the connection string to access Azure SQL.
-var sqlDatabaseConnectionString = 'Server=tcp:${sqlServer.properties.fullyQualifiedDomainName},1433;Initial Catalog=${sqlDatabaseName};Persist Security Info=False;User ID=${sqlServerAdministratorLogin};Password=${sqlServerAdministratorLoginPassword};MultipleActiveResultSets=False;Encrypt=True;TrustServerCertificate=False;Connection Timeout=30;'
-
-// Define the SKUs for each component based on the environment type.
-var environmentConfigurationMap = {
-  Production: {
-    appServicePlan: {
-      sku: {
-        name: 'B1'
-        tier: 'Basic'
-      }
-    }
-    sqlDatabase: {
-      sku: {
-        name: 'Basic'
-        tier: 'Basic'
-      }
-    }
-  }
-  Test: {
-    appServicePlan: {
-      sku: {
-        name: 'B1'
-        tier: 'Basic'
-      }
-    }
-    sqlDatabase: {
-      sku: {
-        name: 'Basic'
-        tier: 'Basic'
-      }
-    }
+module sqlServer '../module/sqlServer.bicep' = {
+  name: 'sqlServerModule'
+  params: {
+    existingSqlServerName: existingSqlServerName
+    existingDatabaseName: existingDatabaseName
   }
 }
 
-resource appServicePlan 'Microsoft.Web/serverfarms@2022-03-01' = {
-  name: appServicePlanName
-  location: location
-  sku: environmentConfigurationMap[environmentType].appServicePlan.sku
-}
+var sqlDatabaseConnectionString = 'Server=tcp:${sqlServer.outputs.sqlServerFullyQualifiedDomainName},1433;Initial Catalog=${existingDatabaseName};Persist Security Info=False;User ID=${sqlServerAdministratorLogin};Password=${sqlServerAdministratorLoginPassword};MultipleActiveResultSets=False;Encrypt=True;TrustServerCertificate=False;Connection Timeout=30;'
 
-resource appServiceApp 'Microsoft.Web/sites@2022-03-01' = {
-  name: appServiceAppName
-  location: location
-  properties: {
-    serverFarmId: appServicePlan.id
-    httpsOnly: true
-    siteConfig: {
-      windowsFxVersion: 'DOTNETCORE|8.0'
-      appSettings: [
-        {
-          name: 'APPINSIGHTS_INSTRUMENTATIONKEY'
-          value: applicationInsights.properties.InstrumentationKey
-        }
-        {
-          name: 'APPLICATIONINSIGHTS_CONNECTION_STRING'
-          value: applicationInsights.properties.ConnectionString
-        }
-        {
-          name: 'Jwt:Issuer'
-          value: '${appServicePlanName}-${resourceNameSuffix}.azurewebsites.net'
-        }
-        {
-          name: 'Jwt:Audience'
-          value: 'TodoApi'
-        }
-        {
-          name: 'ConnectionStrings:Default'
-          value: sqlDatabaseConnectionString
-        }
-        {
-          name: 'Jwt:Key'
-          value: jwtKey
-        }
-      ]
-    }
+module appServicePlan '../module/appServicePlan.bicep' = {
+  name: 'appServicePlanModule'
+  params: {
+    appServicePlanName: appServicePlanName
+    location: location
+    sku: 'F1' // Free tier
   }
 }
 
-resource logAnalyticsWorkspace 'Microsoft.OperationalInsights/workspaces@2022-10-01' = {
-  name: logAnalyticsWorkspaceName
-  location: location
-}
-
-resource applicationInsights 'Microsoft.Insights/components@2020-02-02' = {
-  name: applicationInsightsName
-  location: location
-  kind: 'web'
-  properties: {
-    Application_Type: 'web'
-    Request_Source: 'rest'
-    Flow_Type: 'Bluefield'
-    WorkspaceResourceId: logAnalyticsWorkspace.id
+module appService '../module/appService.bicep' = {
+  name: 'appServiceModule'
+  params: {
+    appServiceName: 'api-website-${resourceNameSuffix}'
+    location: location
+    appServicePlanName: appServicePlan.outputs.appServicePlanName
+    appSettings: appSettings
+    jwtKey: jwtKey
+    sqlDatabaseConnectionString: sqlDatabaseConnectionString
   }
+  dependsOn: [
+    appServicePlan
+    sqlServer
+  ]
 }
 
-resource sqlServer 'Microsoft.Sql/servers@2022-05-01-preview' = {
-  name: sqlServerName
-  location: location
-  properties: {
-    administratorLogin: sqlServerAdministratorLogin
-    administratorLoginPassword: sqlServerAdministratorLoginPassword
-  }
-}
-
-resource sqlServerFirewallRule 'Microsoft.Sql/servers/firewallRules@2022-05-01-preview' = {
-  parent: sqlServer
-  name: 'AllowAllWindowsAzureIps'
-  properties: {
-    endIpAddress: '0.0.0.0'
-    startIpAddress: '0.0.0.0'
-  }
-}
-
-resource sqlDatabase 'Microsoft.Sql/servers/databases@2022-05-01-preview' = {
-  parent: sqlServer
-  name: sqlDatabaseName
-  location: location
-  sku: environmentConfigurationMap[environmentType].sqlDatabase.sku
-}
-
-output appServiceAppName string = appServiceApp.name
-output appServiceAppHostName string = appServiceApp.properties.defaultHostName
-output sqlServerFullyQualifiedDomainName string = sqlServer.properties.fullyQualifiedDomainName
-output sqlDatabaseName string = sqlDatabase.name
+output appServiceAppName string = appService.outputs.appServiceAppName
+output appServiceAppHostName string = appService.outputs.appServiceAppHostName

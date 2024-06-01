@@ -23,6 +23,7 @@ on:
         required: true
       jwtKey:
         required: true
+
 jobs:
   validate:
     runs-on: ubuntu-latest
@@ -41,9 +42,8 @@ jobs:
           scope: resourcegroup
           deploymentName: ${{ github.run_number }}
           resourceGroupName: ${{ inputs.resourceGroupName }}
-          template: main.bicep
+          template: ./infrastructure/deploy/main.bicep
           parameters: >
-            main.parameters.json
             sqlServerAdministratorLogin=${{ inputs.sqlServerAdministratorLogin }}
             sqlServerAdministratorLoginPassword=${{ secrets.sqlServerAdministratorLoginPassword }}
             jwtKey=${{ secrets.jwtKey }}
@@ -56,14 +56,14 @@ jobs:
           scope: resourcegroup
           failOnStdErr: false
           resourceGroupName: ${{ inputs.resourceGroupName }}
-          template: main.bicep
+          template: ./infrastructure/deploy/main.bicep
           parameters: >
-            main.parameters.json
             sqlServerAdministratorLogin=${{ inputs.sqlServerAdministratorLogin }}
             sqlServerAdministratorLoginPassword=${{ secrets.sqlServerAdministratorLoginPassword }}
             jwtKey=${{ secrets.jwtKey }}
             environmentType=${{ inputs.environmentType }}
           additionalArguments: --what-if
+
   deploy:
     needs: validate
     environment: ${{ inputs.environmentType }}
@@ -89,9 +89,8 @@ jobs:
           failOnStdErr: false
           deploymentName: ${{ github.run_number }}
           resourceGroupName: ${{ inputs.resourceGroupName }}
-          template: main.bicep
+          template: ./infrastructure/deploy/main.bicep
           parameters: >
-            main.parameters.json
             sqlServerAdministratorLogin=${{ inputs.sqlServerAdministratorLogin }}
             sqlServerAdministratorLoginPassword=${{ secrets.sqlServerAdministratorLoginPassword }}
             jwtKey=${{ secrets.jwtKey }}

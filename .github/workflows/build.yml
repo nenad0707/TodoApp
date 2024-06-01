@@ -4,7 +4,6 @@ on:
   workflow_call:
 
 jobs:
-  # This workflow contains two jobs, one for building the website and one for building the database
   build-application:
     name: Build Application
     runs-on: ubuntu-latest
@@ -26,6 +25,7 @@ jobs:
         uses: actions/setup-dotnet@v3
         with:
           dotnet-version: 8.0
+
       - name: Build publishable website
         run: |
           dotnet publish --configuration Release
@@ -41,7 +41,7 @@ jobs:
         with:
           name: website
           path: ./TodoApi/bin/Release/net8.0/publish/publish.zip
-  # This job builds the database project
+
   build-database:
     name: Build database
     runs-on: windows-latest
@@ -55,7 +55,7 @@ jobs:
         working-directory: ./TodoDatabase
         run: MSBuild.exe TodoDatabase.sqlproj -property:Configuration=Release
 
-      - name: Upload website as workflow artifact
+      - name: Upload database as workflow artifact
         uses: actions/upload-artifact@v3
         with:
           name: database

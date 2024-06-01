@@ -10,15 +10,12 @@ param appServicePlanName string
 @description('The settings of the App Service.')
 param appSettings array
 
+@secure()
 @description('JWT Key for the App Service.')
 param jwtKey string
 
 @description('SQL Database Connection String for the App Service.')
 param sqlDatabaseConnectionString string
-
-@description('A unique suffix to add to resource names that need to be globally unique.')
-@maxLength(13)
-param resourceNameSuffix string = uniqueString(resourceGroup().id)
 
 var requiredSettings = [
   {
@@ -27,7 +24,7 @@ var requiredSettings = [
   }
   {
     name: 'Jwt__Issuer'
-    value: '${appServicePlanName}-${resourceNameSuffix}.azurewebsites.net'
+    value: '${appServiceName}.azurewebsites.net'
   }
   {
     name: 'Jwt__Audience'
@@ -39,42 +36,18 @@ var requiredSettings = [
   }
 ]
 
-resource appServicePlan 'Microsoft.Web/serverfarms@2021-02-01' existing = {
-  name: appServicePlanName
-}
-
 resource appService 'Microsoft.Web/sites@2021-02-01' = {
   name: appServiceName
   location: location
   properties: {
-    serverFarmId: appServicePlan.id
+    serverFarmId: appServicePlanName
     httpsOnly: true
     siteConfig: {
-      healthCheckPath: '/health'
-      httpLoggingEnabled: true
-      linuxFxVersion: 'DOTNETCORE|8.0' //linuxFxVersion
+      linuxFxVersion: 'DOTNETCORE|8.0'
       appSettings: union(appSettings, requiredSettings)
     }
   }
 }
 
-resource appServiceLogs 'Microsoft.Web/sites/config@2022-09-01' = {
-  parent: appService
-  name: 'logs'
-  properties: {
-    applicationLogs: {
-      fileSystem: {
-        level: 'Information'
-      }
-    }
-    httpLogs: {
-      fileSystem: {
-        retentionInMb: 35
-        retentionInDays: 7
-      }
-    }
-  }
-}
-
-output appServiceAppHostName string = appService.properties.defaultHostName
 output appServiceAppName string = appService.name
+output appServiceAppHostName string = appService.properties.defaultHostName

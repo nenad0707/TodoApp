@@ -4,13 +4,17 @@
 Connect-AzAccount
 
 # Get the Azure subscription context
-$context = Get-AzSubscription -SubscriptionName PAYG-Sandboxes
-
-# Set the Azure context to the specified subscription
-Set-AzContext $context
+$context = Get-AzSubscription -SubscriptionName "Nenad Subscription"
 
 # Set the default resource group
-Set-AzDefault -ResourceGroupName rg_sb_eastus_89803_1_171303635511
+$resourceGroupName = "todoapi-grp"
+
+# Set the Azure context to the specified subscription
+Set-AzContext -Subscription $context.Id
+
+# Set the default resource group
+Set-AzDefault -ResourceGroupName $resourceGroupName
+
 ##change resourse group name
 
 # Set the GitHub organization and repository names
@@ -20,15 +24,8 @@ $githubRepositoryName = 'TodoApp'
 # Create a new Azure AD application
 $applicationRegistration = New-AzADApplication -DisplayName 'TodoApi'
 
-# Create a new Azure AD application federated credential
-New-AzADAppFederatedCredential `
-  -Name 'TodoApp-Production' `
-  -ApplicationObjectId $applicationRegistration.Id `
-  -Issuer 'https://token.actions.githubusercontent.com' `
-  -Audience 'api://AzureADTokenExchange' `
-  -Subject "repo:$($githubOrganizationName)/$($githubRepositoryName):environment:Production"
 
-# Create a new Azure AD application federated credential for the autobicepsuite-branch
+# Create a new Azure AD application federated credential for the TodoApp-production-branch
 New-AzADAppFederatedCredential `
   -Name 'TodoApp-production-branch' `
   -ApplicationObjectId $applicationRegistration.Id `
@@ -37,7 +34,7 @@ New-AzADAppFederatedCredential `
   -Subject "repo:$($githubOrganizationName)/$($githubRepositoryName):ref:refs/heads/main"
 
 # Get the resource group
-$resourceGroup = Get-AzResourceGroup -Name rg_sb_eastus_89803_1_171303635511
+$resourceGroup = Get-AzResourceGroup -Name $resourceGroupName
 
 
 # Create a new Azure AD service principal
