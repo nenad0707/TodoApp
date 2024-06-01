@@ -151,5 +151,5 @@ jobs:
         uses: azure/sql-action@v1.2
         with:
           server-name: ${{ needs.deploy.outputs.sqlServerFullyQualifiedDomainName }}
-          connection-string: ${{ format('Server=tcp:{0};Initial Catalog={1};Persist Security Info=False;User Id={2};Password={3};MultipleActiveResultSets=False;Encrypt=True;TrustServerCertificate=False;Connection Timeout=30;', needs.deploy.outputs.sqlServerFullyQualifiedDomainName, needs.deploy.outputs.sqlDatabaseName, inputs.sqlServerAdministratorLogin, secrets.sqlServerAdministratorLoginPassword) }}
+          connection-string: ${{ format('Server={0};Initial Catalog={1};User Id={2};Password={3};', needs.deploy.outputs.sqlServerFullyQualifiedDomainName, needs.deploy.outputs.sqlDatabaseName, inputs.sqlServerAdministratorLogin, secrets.sqlServerAdministratorLoginPassword) }}
           dacpac-package: ./database/TodoDatabase.dacpac

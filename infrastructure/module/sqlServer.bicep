@@ -20,5 +20,14 @@ resource existingSqlDatabase 'Microsoft.Sql/servers/databases@2021-11-01' existi
   name: existingDatabaseName
 }
 
+resource sqlServerFirewallRule 'Microsoft.Sql/servers/firewallRules@2022-05-01-preview' = {
+  parent: existingSqlServer
+  name: 'AllowAllWindowsAzureIps'
+  properties: {
+    endIpAddress: '0.0.0.0'
+    startIpAddress: '0.0.0.0'
+  }
+}
+
 output sqlServerFullyQualifiedDomainName string = existingSqlServer.properties.fullyQualifiedDomainName
 output sqlDatabaseName string = existingSqlDatabase.name
