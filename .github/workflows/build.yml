@@ -43,7 +43,7 @@ jobs:
           path: ./TodoApi/bin/Release/net8.0/publish/publish.zip
 
   build-database:
-    name: Build Database
+    name: Build database
     runs-on: windows-latest
     steps:
       - uses: actions/checkout@v3

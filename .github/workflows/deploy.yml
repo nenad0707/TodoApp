@@ -116,7 +116,7 @@ jobs:
       - uses: actions/download-artifact@v3
         with:
           name: website
-          path: website/publish.zip
+          path: ./website
       - uses: azure/login@v1
         name: Sign in to Azure
         with:
@@ -130,7 +130,7 @@ jobs:
         name: Deploy website
         with:
           app-name: ${{ needs.deploy.outputs.appServiceAppName }}
-          package: website/publish.zip
+          package: ./website/publish.zip
 
   deploy-database:
     needs: deploy
@@ -140,16 +140,16 @@ jobs:
       - uses: actions/download-artifact@v3
         with:
           name: database
-          path: database/TodoDatabase.dacpac
+          path: ./database
       - uses: azure/login@v1
         name: Sign in to Azure
         with:
           client-id: ${{ secrets.AZURE_CLIENT_ID }}
           tenant-id: ${{ secrets.AZURE_TENANT_ID }}
           subscription-id: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
-      - uses: azure/sql-action@v1.2
-        name: Deploy DACPAC to database
+      - name: Deploy DACPAC to database
+        uses: azure/sql-action@v1.2
         with:
           server-name: ${{ needs.deploy.outputs.sqlServerFullyQualifiedDomainName }}
           connection-string: ${{ format('Server={0};Initial Catalog={1};User Id={2};Password={3};', needs.deploy.outputs.sqlServerFullyQualifiedDomainName, needs.deploy.outputs.sqlDatabaseName, inputs.sqlServerAdministratorLogin, secrets.sqlServerAdministratorLoginPassword) }}
-          dacpac-package: database/TodoDatabase.dacpac
+          dacpac-package: ./database/TodoDatabase.dacpac

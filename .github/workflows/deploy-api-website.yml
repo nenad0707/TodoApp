@@ -20,10 +20,10 @@ jobs:
           az bicep build --file ./infrastructure/deploy/main.bicep
 
   deploy-production:
-    uses: ./.github/workflows/deploy.yml
     needs:
       - lint
       - build
+    uses: ./.github/workflows/deploy.yml
     with:
       environmentType: Production
       resourceGroupName: todoapi-grp
