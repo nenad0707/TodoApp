@@ -72,3 +72,5 @@ module appService '../module/appService.bicep' = {
 
 output appServiceAppName string = appService.outputs.appServiceAppName
 output appServiceAppHostName string = appService.outputs.appServiceAppHostName
+output sqlDatabaseName string = sqlServer.outputs.sqlDatabaseName
+output sqlServerFullyQualifiedDomainName string = sqlServer.outputs.sqlServerFullyQualifiedDomainName
