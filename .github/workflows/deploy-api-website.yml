@@ -28,6 +28,8 @@ jobs:
       environmentType: Production
       resourceGroupName: todoapi-grp
       sqlServerAdministratorLogin: nenad
+      existingSqlServerName: todoapiserver
+      existingDatabaseName: TodoDb
     secrets:
       AZURE_CLIENT_ID: ${{ secrets.AZURE_CLIENT_ID }}
       AZURE_TENANT_ID: ${{ secrets.AZURE_TENANT_ID }}
