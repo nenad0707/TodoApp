@@ -24,6 +24,13 @@ $githubRepositoryName = 'TodoApp'
 # Create a new Azure AD application
 $applicationRegistration = New-AzADApplication -DisplayName 'TodoApi'
 
+# Create a new Azure AD application federated credential
+New-AzADAppFederatedCredential `
+  -Name 'TodoApp-production-environment' `
+  -ApplicationObjectId $applicationRegistration.Id `
+  -Issuer 'https://token.actions.githubusercontent.com' `
+  -Audience 'api://AzureADTokenExchange' `
+  -Subject "repo:$($githubOrganizationName)/$($githubRepositoryName):environment:Production"
 
 # Create a new Azure AD application federated credential for the TodoApp-production-branch
 New-AzADAppFederatedCredential `
@@ -32,6 +39,7 @@ New-AzADAppFederatedCredential `
   -Issuer 'https://token.actions.githubusercontent.com' `
   -Audience 'api://AzureADTokenExchange' `
   -Subject "repo:$($githubOrganizationName)/$($githubRepositoryName):ref:refs/heads/main"
+
 
 # Get the resource group
 $resourceGroup = Get-AzResourceGroup -Name $resourceGroupName
