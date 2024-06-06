@@ -10,6 +10,7 @@ public class PingHelper
 {
     private readonly IHttpClientFactory _httpClientFactory;
     private readonly string _connectionString;
+    private readonly string _apiUrl;
 
     /// <summary>
     /// Initializes a new instance of the <see cref="PingHelper"/> class.
@@ -20,6 +21,7 @@ public class PingHelper
     {
         _httpClientFactory = httpClientFactory;
         _connectionString = configuration.GetConnectionString("Default")!;
+        _apiUrl = configuration["ApiUrl"]!;
     }
 
     /// <summary>
@@ -29,9 +31,10 @@ public class PingHelper
     public async Task<bool> PingApi()
     {
         var httpClient = _httpClientFactory.CreateClient("api");
+        httpClient.BaseAddress = new Uri(_apiUrl);
         try
         {
-            var response = await httpClient.GetAsync("/health");
+            var response = await httpClient.GetAsync("health");
             return response.IsSuccessStatusCode;
         }
         catch (Exception ex)

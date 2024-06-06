@@ -180,6 +180,7 @@ public static class DependencyInjectionExtensions
     /// <param name="builder">The <see cref="WebApplicationBuilder"/> instance.</param>
     public static void AddPingHelperService(this WebApplicationBuilder builder)
     {
+        builder.Services.AddHttpClient(); 
         builder.Services.AddScoped<PingHelper>();
     }
 
