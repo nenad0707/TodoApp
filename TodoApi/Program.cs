@@ -1,4 +1,5 @@
 using AspNetCoreRateLimit;
+using Hangfire;
 using TodoApi.StartupConfig;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -12,6 +13,8 @@ builder.AddCustomServices();
 builder.AddCorsServices();
 builder.AddSerilogServices();
 builder.AddRateLimitingService();
+builder.AddHangfireServices(); // Add Hangfire services
+builder.AddPingHelperService(); // Add PingHelper service
 
 var app = builder.Build();
 
@@ -42,5 +45,9 @@ app.UseAuthorization();
 app.MapControllers();
 
 app.MapHealthChecks("/health").AllowAnonymous();
+
+app.UseHangfireDashboard("/hangfire"); // Add Hangfire Dashboard
+
+app.UseHangfireJobs(); // Use the new middleware to set up Hangfire jobs
 
 app.Run();

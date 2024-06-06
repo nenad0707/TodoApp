@@ -1,10 +1,12 @@
 ﻿using AspNetCoreRateLimit;
+using Hangfire;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
 using Serilog;
 using System.Reflection;
 using System.Text;
+using TodoApi.Helpers;
 using TodoApi.Services;
 using TodoLibrary;
 using TodoLibrary.DataAccess;
@@ -171,4 +173,29 @@ public static class DependencyInjectionExtensions
         });
         });
     }
+
+    /// <summary>
+    /// Adds PingHelper service to the dependency injection container.
+    /// </summary>
+    /// <param name="builder">The <see cref="WebApplicationBuilder"/> instance.</param>
+    public static void AddPingHelperService(this WebApplicationBuilder builder)
+    {
+        builder.Services.AddScoped<PingHelper>();
+    }
+
+    /// <summary>
+    /// Adds Hangfire services to the dependency injection container.
+    /// </summary>
+    /// <param name="builder">The <see cref="WebApplicationBuilder"/> instance.</param>
+    public static void AddHangfireServices(this WebApplicationBuilder builder)
+    {
+        builder.Services.AddHangfire(config =>
+        {
+            config.UseSqlServerStorage(builder.Configuration.GetConnectionString("Default"));
+        });
+
+        builder.Services.AddHangfireServer(); // Add Hangfire Server
+    }
+
+
 }
