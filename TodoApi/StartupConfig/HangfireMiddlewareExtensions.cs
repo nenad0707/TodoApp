@@ -1,27 +1,34 @@
 ﻿using Hangfire;
-using Microsoft.AspNetCore.Builder;
-using Microsoft.Extensions.DependencyInjection;
 using TodoApi.Helpers;
 
-namespace TodoApi.StartupConfig
+namespace TodoApi.StartupConfig;
+
+/// <summary>
+/// Extension methods for configuring Hangfire recurring jobs in the application.
+/// </summary>
+public static class HangfireMiddlewareExtensions
 {
-    public static class HangfireMiddlewareExtensions
+    /// <summary>
+    /// Configures Hangfire recurring jobs for the application.
+    /// </summary>
+    /// <param name="app">The application builder instance.</param>
+    /// <returns>The application builder instance with Hangfire jobs configured.</returns>
+    public static IApplicationBuilder UseHangfireJobs(this IApplicationBuilder app)
     {
-        public static IApplicationBuilder UseHangfireJobs(this IApplicationBuilder app)
-        {
-            var serviceProvider = app.ApplicationServices;
+        var serviceProvider = app.ApplicationServices;
 
-            RecurringJob.AddOrUpdate(
-                "PingApi",
-                () => serviceProvider.CreateScope().ServiceProvider.GetRequiredService<PingHelper>().PingApiWithRetry(),
-                "*/15 * * * *"); // Adjust to "*/5 * * * *" if needed
+        // Adds or updates a recurring job to ping an API every 15 minutes.
+        RecurringJob.AddOrUpdate(
+            "PingApi",
+            () => serviceProvider.CreateScope().ServiceProvider.GetRequiredService<PingHelper>().PingApiWithRetry(),
+            "*/15 * * * *"); // Adjust to "*/5 * * * *" if needed
 
-            RecurringJob.AddOrUpdate(
-                "PingDatabase",
-                () => serviceProvider.CreateScope().ServiceProvider.GetRequiredService<PingHelper>().PingDatabaseWithRetry(),
-                "*/15 * * * *"); // Adjust to "*/5 * * * *" if needed
+        // Adds or updates a recurring job to ping a database every 15 minutes.
+        RecurringJob.AddOrUpdate(
+            "PingDatabase",
+            () => serviceProvider.CreateScope().ServiceProvider.GetRequiredService<PingHelper>().PingDatabaseWithRetry(),
+            "*/15 * * * *"); // Adjust to "*/5 * * * *" if needed
 
-            return app;
-        }
+        return app;
     }
 }
