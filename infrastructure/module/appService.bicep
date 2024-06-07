@@ -34,6 +34,10 @@ var requiredSettings = [
     name: 'ConnectionStrings__Default'
     value: sqlDatabaseConnectionString
   }
+  {
+    name: 'ApiUrl'
+    value: 'https://${appServiceName}.azurewebsites.net'
+  }
 ]
 
 resource appService 'Microsoft.Web/sites@2021-02-01' = {
