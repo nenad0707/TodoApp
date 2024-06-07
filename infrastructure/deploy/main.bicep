@@ -43,7 +43,7 @@ module sqlServer '../module/sqlServer.bicep' = {
   }
 }
 
-var sqlDatabaseConnectionString = 'Server=tcp:${sqlServer.outputs.sqlServerFullyQualifiedDomainName},1433;Initial Catalog=${existingDatabaseName};Persist Security Info=False;User ID=${sqlServerAdministratorLogin};Password=${sqlServerAdministratorLoginPassword};MultipleActiveResultSets=False;Encrypt=True;TrustServerCertificate=False;Connection Timeout=30;'
+var sqlDatabaseConnectionString = 'Server=tcp:${sqlServer.outputs.sqlServerFullyQualifiedDomainName},1433;Initial Catalog=${existingDatabaseName};Persist Security Info=False;User ID=${sqlServerAdministratorLogin};Password=${sqlServerAdministratorLoginPassword};MultipleActiveResultSets=False;Encrypt=True;TrustServerCertificate=False;Connection Timeout=30;ConnectRetryCount=5;ConnectRetryInterval=10;Max Pool Size=100;Min Pool Size=0;'
 
 module appServicePlan '../module/appServicePlan.bicep' = {
   name: 'appServicePlanModule'

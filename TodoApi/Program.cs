@@ -47,12 +47,12 @@ app.MapControllers();
 
 app.MapHealthChecks("/health").AllowAnonymous();
 
-// Configure Hangfire Dashboard to allow anonymous access
-app.UseHangfireDashboard("/hangfire", new DashboardOptions
-{
-    Authorization = new[] { new AllowAnonymousDashboardAuthorizationFilter() }
-});
+//// Configure Hangfire Dashboard to allow anonymous access
+//app.UseHangfireDashboard("/hangfire", new DashboardOptions
+//{
+//    Authorization = new[] { new AllowAnonymousDashboardAuthorizationFilter() }
+//});
 
-app.UseHangfireJobs(); // Use the new middleware to set up Hangfire jobs
+//app.UseHangfireJobs(); // Use the new middleware to set up Hangfire jobs
 
 app.Run();
