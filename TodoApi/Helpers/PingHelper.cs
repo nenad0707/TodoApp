@@ -45,27 +45,6 @@ public class PingHelper
     }
 
     /// <summary>
-    /// Pings the database to check if it is up and running.
-    /// </summary>
-    /// <returns>True if the database is up, otherwise false.</returns>
-    public async Task<bool> PingDatabase()
-    {
-        try
-        {
-            using (var connection = new SqlConnection(_connectionString))
-            {
-                var result = await connection.ExecuteScalarAsync<int>("SELECT 1");
-                return result == 1;
-            }
-        }
-        catch (Exception ex)
-        {
-            Console.WriteLine($"Error pinging database: {ex.Message}");
-            return false;
-        }
-    }
-
-    /// <summary>
     /// Tries to ping the API with retries in case of failures.
     /// </summary>
     public async Task PingApiWithRetry()
@@ -83,25 +62,5 @@ public class PingHelper
             await Task.Delay(delay);
         }
         Console.WriteLine("API is down after multiple attempts");
-    }
-
-    /// <summary>
-    /// Tries to ping the database with retries in case of failures.
-    /// </summary>
-    public async Task PingDatabaseWithRetry()
-    {
-        const int maxAttempts = 5;
-        const int delay = 5000; // 5 seconds delay between retries
-
-        for (int attempt = 0; attempt < maxAttempts; attempt++)
-        {
-            if (await PingDatabase())
-            {
-                Console.WriteLine("Database is up");
-                return;
-            }
-            await Task.Delay(delay);
-        }
-        Console.WriteLine("Database is down after multiple attempts");
     }
 }

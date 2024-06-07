@@ -23,12 +23,6 @@ public static class HangfireMiddlewareExtensions
             () => serviceProvider.CreateScope().ServiceProvider.GetRequiredService<PingHelper>().PingApiWithRetry(),
             "*/15 * * * *"); // Adjust to "*/5 * * * *" if needed
 
-        // Adds or updates a recurring job to ping a database every 15 minutes.
-        RecurringJob.AddOrUpdate(
-            "PingDatabase",
-            () => serviceProvider.CreateScope().ServiceProvider.GetRequiredService<PingHelper>().PingDatabaseWithRetry(),
-            "*/15 * * * *"); // Adjust to "*/5 * * * *" if needed
-
         return app;
     }
 }
