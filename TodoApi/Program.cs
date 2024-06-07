@@ -1,5 +1,6 @@
 using AspNetCoreRateLimit;
 using Hangfire;
+using TodoApi.Filters;
 using TodoApi.StartupConfig;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -46,7 +47,11 @@ app.MapControllers();
 
 app.MapHealthChecks("/health").AllowAnonymous();
 
-app.UseHangfireDashboard("/hangfire"); // Add Hangfire Dashboard
+// Configure Hangfire Dashboard to allow anonymous access
+app.UseHangfireDashboard("/hangfire", new DashboardOptions
+{
+    Authorization = new[] { new AllowAnonymousDashboardAuthorizationFilter() }
+});
 
 app.UseHangfireJobs(); // Use the new middleware to set up Hangfire jobs
 
