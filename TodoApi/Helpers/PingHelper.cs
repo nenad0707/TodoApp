@@ -22,7 +22,7 @@ public class PingHelper
     public PingHelper(IHttpClientFactory httpClientFactory, IConfiguration configuration, IMemoryCache cache, ILogger<PingHelper> logger)
     {
         _httpClientFactory = httpClientFactory;
-        _healthEndpoint = configuration["ApiUrl"] + "/health";
+        _healthEndpoint = configuration["ApiUrl"] + "health";
         _cache = cache;
         _logger = logger;
     }
