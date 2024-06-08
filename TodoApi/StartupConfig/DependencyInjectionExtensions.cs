@@ -1,5 +1,4 @@
 ﻿using AspNetCoreRateLimit;
-using Hangfire;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
@@ -173,30 +172,20 @@ public static class DependencyInjectionExtensions
         });
         });
     }
-
+    
     /// <summary>
-    /// Adds PingHelper service to the dependency injection container.
+    /// Adds services related to ping functionality to the dependency injection container.
     /// </summary>
     /// <param name="builder">The <see cref="WebApplicationBuilder"/> instance.</param>
-    public static void AddPingHelperService(this WebApplicationBuilder builder)
+    public static void AddPingServices(this WebApplicationBuilder builder)
     {
-        builder.Services.AddHttpClient(); 
+        // Adds the default HTTP client factory to the service collection.
+        builder.Services.AddHttpClient();
+
+        // Registers the PingHelper class with a scoped lifetime.
         builder.Services.AddScoped<PingHelper>();
+
+        // Registers the PingApiService class as a hosted service.
+        builder.Services.AddHostedService<PingApiService>();
     }
-
-    /// <summary>
-    /// Adds Hangfire services to the dependency injection container.
-    /// </summary>
-    /// <param name="builder">The <see cref="WebApplicationBuilder"/> instance.</param>
-    public static void AddHangfireServices(this WebApplicationBuilder builder)
-    {
-        builder.Services.AddHangfire(config =>
-        {
-            config.UseSqlServerStorage(builder.Configuration.GetConnectionString("Default"));
-        });
-
-        builder.Services.AddHangfireServer(); // Add Hangfire Server
-    }
-
-
 }
