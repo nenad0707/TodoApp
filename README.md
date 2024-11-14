@@ -24,6 +24,8 @@
   - [Technologies Used 🔧](#technologies-used-)
   - [User Flow 👥](#user-flow-)
   - [API Endpoints 🛠️](#api-endpoints-️)
+    - [Authentication Endpoints](#authentication-endpoints)
+    - [Todo Endpoints](#todo-endpoints)
   - [Azure Bicep and Modules ☁️](#azure-bicep-and-modules-️)
   - [⚠️ Warning](#️-warning)
   - [Azure Scripts 📜](#azure-scripts-)
@@ -57,14 +59,26 @@ To use the API, users need to:
 
 ## API Endpoints 🛠️
 
-| Method | Endpoint           | Description       |
-| ------ | ------------------ | ----------------- |
-| POST   | /api/auth/register | Register new user |
-| POST   | /api/auth/login    | Login user        |
-| GET    | /api/todos         | Get all todos     |
-| POST   | /api/todos         | Create new todo   |
-| PUT    | /api/todos/{id}    | Update todo       |
-| DELETE | /api/todos/{id}    | Delete todo       |
+### Authentication Endpoints
+
+| Method | Endpoint              | Description                  |
+| ------ | --------------------- | ---------------------------- |
+| POST   | /api/Auth/register    | Register new user            |
+| POST   | /api/Auth/login       | Login user and get JWT token |
+| DELETE | /api/Auth/delete/{id} | Delete user account          |
+
+### Todo Endpoints
+
+| Method | Endpoint                     | Description               |
+| ------ | ---------------------------- | ------------------------- |
+| GET    | /api/Todos                   | Get all todos (paginated) |
+| GET    | /api/Todos/{todoId}          | Get specific todo by ID   |
+| POST   | /api/Todos                   | Create new todo           |
+| PUT    | /api/Todos/{todoId}          | Update todo task          |
+| PUT    | /api/Todos/{todoId}/Complete | Mark todo as complete     |
+| DELETE | /api/Todos/{todoId}          | Delete todo               |
+
+> Note: All Todo endpoints require authentication using JWT token obtained from login endpoint. Include the token in the Authorization header as `Bearer <token>`.
 
 ## Azure Bicep and Modules ☁️
 
